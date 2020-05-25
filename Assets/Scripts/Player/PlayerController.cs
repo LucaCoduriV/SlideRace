@@ -1,0 +1,227 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerController : MonoBehaviour
+{
+
+    #region Public Fields 
+
+
+
+    #endregion
+
+    #region Private Fields
+
+    [SerializeField] private float life = 100.0f;
+    [SerializeField] public List<GameObject> inventory;
+    [SerializeField] private int selectedObject;
+    [SerializeField] private Transform leftHandTransform;
+    [SerializeField] private Transform mainCamera;
+    [SerializeField] private float cutDistance = 2;
+    [SerializeField] private float cutDamage = 25;
+
+    private InputMaster inputMaster;
+    private bool isDead = false;
+    private Animator animator;
+
+
+    #endregion
+
+    public bool IsDead { get => isDead; }
+    public float Life { get => life;}
+
+    public void SetLife(float life)
+    {
+        this.life = life;
+    }
+    public void RemoveLife(float quantity)
+    {
+        if((this.life - quantity) < 0)
+        {
+            this.life = 0;
+        }
+        else
+        {
+            this.life -= quantity;
+        }
+        
+    }
+
+    public void Kill()
+    {
+        this.life = 0;
+        this.isDead = true;
+    }
+
+    void Awake()
+    {
+        inputMaster = new InputMaster();
+        inputMaster.Player.Shoot.performed += ctx => Cut();
+        inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+        inventory = new List<GameObject>();
+        selectedObject = 0;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Debug.DrawRay(mainCamera.position + mainCamera.forward, mainCamera.forward * cutDistance);
+
+        if(leftHandTransform != null)
+        {
+            //ShowSelectedItem();
+        }
+        else
+        {
+            Debug.LogError("Unable to pickup object without a hand");
+        }
+        
+        
+    }
+
+    private void IsAlive()
+    {
+        if (life <= 0) isDead = true;
+        else isDead = false;
+    }
+
+
+    private void ShowSelectedItem()
+    {
+        if(inventory.Count != 0)
+        {
+            inventory[selectedObject].SetActive(true);
+            inventory[selectedObject].transform.position = leftHandTransform.position;
+        }
+        
+    }
+
+    public void SelectObjectID(int id)
+    {
+        selectedObject = id;
+    }
+
+    public void NextObject()
+    {
+        disableAllItemsInventory();
+
+        if (selectedObject == (inventory.Count - 1))
+        {
+            selectedObject = 0;
+        }
+        else
+        {
+            selectedObject++;
+        }
+
+    }
+    public void PreviousObject()
+    {
+        disableAllItemsInventory();
+
+        if (selectedObject == 0)
+        {
+            selectedObject = (inventory.Count - 1);
+        }
+        else
+        {
+            selectedObject--;
+        }
+
+    }
+
+    private void disableAllItemsInventory()
+    {
+        for (int i = 0; i < inventory.Count; i++)
+        {
+            inventory[i].SetActive(false);
+        }
+    }
+
+    private void UseSelectedItem()
+    {
+        
+
+        if(inventory.Count > 0)
+        {
+            inventory[selectedObject].GetComponent<IPickableItem>().Use(mainCamera);
+            inventory.RemoveAt(selectedObject);      
+        }
+        else
+        {
+            Debug.LogWarning("No item in inventory !!");
+        }
+        
+    }
+
+    private void Cut()
+    {
+        if (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("Cut") && !this.animator.IsInTransition(0))
+        {
+            animator.SetTrigger("Shoot1");
+
+            RaycastHit hit;
+
+            if(Physics.Raycast(mainCamera.position + mainCamera.forward.normalized, mainCamera.forward.normalized, out hit, cutDistance))
+            {
+                Debug.Log("TOUCHE!! " + hit.transform.gameObject.name);
+                if (hit.transform.CompareTag("Player"))
+                {
+                    hit.transform.GetComponent<PlayerController>().RemoveLife(cutDamage);
+                }
+                
+            }
+            else
+            {
+                Debug.Log("RATE!!!");
+            }
+        }
+        
+    }
+
+    public void PickupObject(GameObject objectToPickUp)
+    {
+        //checker s'il y a la place pour rammasser l'objet
+
+        //Executer la routine d'un object ramassé
+        objectToPickUp.GetComponent<IPickableItem>().OnPickup();
+        //puis l'ajouter dans l'inventaire
+        inventory.Add(objectToPickUp);
+        //le déplacer dans la main gauche
+        objectToPickUp.transform.position = leftHandTransform.position;
+        objectToPickUp.transform.parent = leftHandTransform;
+        //Vérifier s'il y a un autre objet dans l'inventaire si non le séléctionner directement
+        if(inventory.Count == 1)
+        {
+            objectToPickUp.gameObject.SetActive(true);
+        }
+        
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.transform.tag.Contains("Pickable"))
+        {
+            PickupObject(other.gameObject);
+        }
+        
+    }
+
+    public void OnEnable()
+    {
+        inputMaster.Enable();
+    }
+
+    public void OnDisable()
+    {
+        inputMaster.Disable();
+    }
+}
