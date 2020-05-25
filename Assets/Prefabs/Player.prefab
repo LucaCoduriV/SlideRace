@@ -319,6 +319,9 @@ MonoBehaviour:
   inventory: []
   selectedObject: 0
   leftHandTransform: {fileID: 7743939211727728830}
+  mainCamera: {fileID: 7743939212657682870}
+  cutDistance: 2
+  cutDamage: 25
 --- !u!95 &7743939212922933991
 Animator:
   serializedVersion: 3
