@@ -285,11 +285,19 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
 
     public void OnEnable()
     {
+        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
         inputMaster.Enable();
     }
 
     public void OnDisable()
     {
+        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
         inputMaster.Disable();
     }
 

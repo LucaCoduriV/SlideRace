@@ -20,9 +20,23 @@ namespace Ch.Luca.MyGame
 
         #region MonoBehaviour Methods
 
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
+
         void Start()
         {
-            Instance = this;
+            
+            
 
             if (playerPrefab == null)
             {
@@ -91,7 +105,7 @@ namespace Ch.Luca.MyGame
             {
                 Debug.LogFormat("OnPlayerEnteredRoom() IsMasterClient {0}", PhotonNetwork.IsMasterClient);
 
-                LoadArena();
+                //LoadArena();
             }
         }
 

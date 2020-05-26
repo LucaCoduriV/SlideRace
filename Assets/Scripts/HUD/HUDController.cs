@@ -15,7 +15,7 @@ public class HUDController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        player = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>();
     }
 
     // Update is called once per frame

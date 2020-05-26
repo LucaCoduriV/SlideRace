@@ -34,42 +34,34 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public bool IsDead { get => isDead; }
     public float Life { get => life;}
 
-    public void SetLife(float life)
-    {
-        this.life = life;
-    }
-    public void RemoveLife(float quantity)
-    {
-        if((this.life - quantity) < 0)
-        {
-            this.life = 0;
-        }
-        else
-        {
-            this.life -= quantity;
-        }
-        
-    }
-
-    public void Kill()
-    {
-        this.life = 0;
-        this.isDead = true;
-    }
+    
 
     void Awake()
     {
-        if (photonView.IsMine)
-        {
-            PlayerController.LocalPlayerInstance = this.gameObject;
 
-            inputMaster = new InputMaster();
-            inputMaster.Player.Shoot.performed += ctx => Cut();
-            inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+        if (!photonView.IsMine && PhotonNetwork.IsConnected)
+        {
+            return;
         }
 
+        if (photonView.IsMine || !PhotonNetwork.IsConnected)
+        {
+            if(PlayerController.LocalPlayerInstance != null)
+            {
+                Destroy(this.gameObject);
+            }
+            else
+            {
+                PlayerController.LocalPlayerInstance = this.gameObject;
 
+            }
+        }
         
+
+        inputMaster = new InputMaster();
+        inputMaster.Player.Shoot.performed += ctx => Cut();
+        inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+
     }
 
     // Start is called before the first frame update
@@ -96,6 +88,38 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
         
         
+    }
+
+    public void SetLife(float life)
+    {
+        this.life = life;
+    }
+
+    public void SendRemoveLife(float quantity)
+    {
+        photonView.RPC("RemoveLife", RpcTarget.Others, cutDamage);
+        
+    }
+
+    [PunRPC]
+    public void RemoveLife(float quantity)
+    {
+        Debug.Log("removeLife executed !!", this);
+        if ((this.life - quantity) < 0)
+        {
+            this.life = 0;
+        }
+        else
+        {
+            this.life -= quantity;
+        }
+
+    }
+
+    public void Kill()
+    {
+        this.life = 0;
+        this.isDead = true;
     }
 
     private void IsAlive()
@@ -186,7 +210,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 Debug.Log("TOUCHE!! " + hit.transform.gameObject.name);
                 if (hit.transform.CompareTag("Player"))
                 {
-                    hit.transform.GetComponent<PlayerController>().RemoveLife(cutDamage);
+                    hit.transform.GetComponent<PlayerController>().SendRemoveLife(cutDamage);
+                    
                 }
                 
             }
@@ -228,16 +253,38 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void OnEnable()
     {
+        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
         inputMaster.Enable();
     }
 
     public void OnDisable()
     {
+        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
+        if(this == PlayerController.LocalPlayerInstance)
+        {
+            PlayerController.LocalPlayerInstance = null;
+        }
+
         inputMaster.Disable();
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        
+        if (stream.IsWriting)
+        {
+            // We own this player: send the others our data
+            stream.SendNext(life);
+        }
+        else
+        {
+            // Network player, receive data
+            this.life = (float)stream.ReceiveNext();
+        }
     }
 }

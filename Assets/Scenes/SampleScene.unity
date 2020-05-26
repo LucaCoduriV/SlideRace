@@ -233,7 +233,7 @@ GameObject:
   - component: {fileID: 717483349}
   - component: {fileID: 717483353}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: HUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1488,6 +1488,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -812305142692214648, guid: 8275f6ea5503234419e57cf1a48f19e0,
+        type: 3}
+      propertyPath: viewIdField
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1024119451343493588, guid: 8275f6ea5503234419e57cf1a48f19e0,
         type: 3}
       propertyPath: m_Name
