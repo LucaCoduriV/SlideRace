@@ -529,7 +529,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   groundDistance: 0.4
-  speed: 500
+  speed: 501
   maxVelocityChange: 10
   canJump: 1
   jumpHeight: 2
