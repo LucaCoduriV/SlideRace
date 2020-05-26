@@ -129,7 +129,7 @@ namespace Ch.Luca.MyGame
             if(PhotonNetwork.CurrentRoom.PlayerCount == 1)
             {
                 //load the room
-                PhotonNetwork.LoadLevel("Room for 1");
+                PhotonNetwork.LoadLevel("Multiplayer test");
             }
 
         }

@@ -1,14 +1,16 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
 
     #region Public Fields 
 
-
+    [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
+    public static GameObject LocalPlayerInstance;
 
     #endregion
 
@@ -18,10 +20,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] public List<GameObject> inventory;
     [SerializeField] private int selectedObject;
     [SerializeField] private Transform leftHandTransform;
-    [SerializeField] private Transform mainCamera;
     [SerializeField] private float cutDistance = 2;
     [SerializeField] private float cutDamage = 25;
 
+    private Transform mainCamera;
     private InputMaster inputMaster;
     private bool isDead = false;
     private Animator animator;
@@ -57,14 +59,23 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
-        inputMaster = new InputMaster();
-        inputMaster.Player.Shoot.performed += ctx => Cut();
-        inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+        if (photonView.IsMine)
+        {
+            PlayerController.LocalPlayerInstance = this.gameObject;
+
+            inputMaster = new InputMaster();
+            inputMaster.Player.Shoot.performed += ctx => Cut();
+            inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+        }
+
+
+        
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        mainCamera = Camera.main.transform;
         animator = GetComponent<Animator>();
         inventory = new List<GameObject>();
         selectedObject = 0;
@@ -223,5 +234,10 @@ public class PlayerController : MonoBehaviour
     public void OnDisable()
     {
         inputMaster.Disable();
+    }
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        
     }
 }

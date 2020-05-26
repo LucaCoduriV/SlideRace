@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class rigidbodyController : MonoBehaviour
+public class rigidbodyController : MonoBehaviourPunCallbacks
 {
 
 
@@ -45,12 +46,18 @@ public class rigidbodyController : MonoBehaviour
 
     private void Awake()
     {
-        inputMaster = new InputMaster();
         body.freezeRotation = true;
-        inputMaster.Player.Movement.performed += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-        inputMaster.Player.Movement.canceled += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-        inputMaster.Player.Jump.performed += ctx => doAJump = true;
-        inputMaster.Player.Jump.canceled += ctx => doAJump = false;
+
+        if (photonView.IsMine)
+        {
+            inputMaster = new InputMaster();
+
+            inputMaster.Player.Movement.performed += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
+            inputMaster.Player.Movement.canceled += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
+            inputMaster.Player.Jump.performed += ctx => doAJump = true;
+            inputMaster.Player.Jump.canceled += ctx => doAJump = false;
+        }
+        
     }
 
     void SetMovementSpeed(Vector2 movement)
