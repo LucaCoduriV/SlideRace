@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     #region Private Fields
 
-    [SerializeField] private float life = 100.0f;
+    [SerializeField] private float health = 100.0f;
     [SerializeField] public List<GameObject> inventory;
     [SerializeField] private int selectedObject;
     [SerializeField] private Transform leftHandTransform;
@@ -32,7 +32,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     #endregion
 
     public bool IsDead { get => isDead; }
-    public float Life { get => life;}
+    public float Health { get => health;}
+
 
     
 
@@ -71,6 +72,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         animator = GetComponent<Animator>();
         inventory = new List<GameObject>();
         selectedObject = 0;
+
+        //si c'est le joueur local on affiche son HUD
+        if(LocalPlayerInstance == this.gameObject)
+        {
+            HUDController.SetPlayerToShowHUD(this);
+        }
+        
     }
 
     // Update is called once per frame
@@ -89,10 +97,18 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         
         
     }
+    
 
     public void SetLife(float life)
     {
-        this.life = life;
+        this.health = life;
+        IsAlive();
+
+        if (HUDController.GetPlayerToShowHUD() == this)
+        {
+            //updateHUD
+            HUDController.UpdateHUD();
+        }
     }
 
     public void SendRemoveLife(float quantity)
@@ -104,27 +120,45 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [PunRPC]
     public void RemoveLife(float quantity)
     {
-        Debug.Log("removeLife executed !!", this);
-        if ((this.life - quantity) < 0)
+        if ((this.health - quantity) < 0)
         {
-            this.life = 0;
+            this.health = 0;
         }
         else
         {
-            this.life -= quantity;
+            this.health -= quantity;
         }
+
+        IsAlive();
+
+        if(HUDController.GetPlayerToShowHUD() == this)
+        {
+            //updateHUD
+            HUDController.UpdateHUD();
+        }
+        
 
     }
 
     public void Kill()
     {
-        this.life = 0;
+        this.health = 0;
         this.isDead = true;
+
+        if (HUDController.GetPlayerToShowHUD() == this)
+        {
+            //updateHUD
+            HUDController.UpdateHUD();
+        }
     }
 
     private void IsAlive()
     {
-        if (life <= 0) isDead = true;
+        if (health <= 0)
+        {
+            //cacher le couteau
+            isDead = true;
+        }
         else isDead = false;
     }
 
@@ -199,7 +233,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void Cut()
     {
-        if (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("Cut") && !this.animator.IsInTransition(0))
+        if (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("Cut") && !this.animator.IsInTransition(0) && !isDead)
         {
             animator.SetTrigger("Shoot1");
 
@@ -227,6 +261,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         //checker s'il y a la place pour rammasser l'objet
 
+        
+        //modifier le owner de l'objet
+        if (photonView.IsMine)
+        {
+            objectToPickUp.GetComponent<IPickableItem>().ChangeOwner();
+        }
         //Executer la routine d'un object ramassé
         objectToPickUp.GetComponent<IPickableItem>().OnPickup();
         //puis l'ajouter dans l'inventaire
@@ -279,12 +319,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         if (stream.IsWriting)
         {
             // We own this player: send the others our data
-            stream.SendNext(life);
+            stream.SendNext(health);
         }
         else
         {
             // Network player, receive data
-            this.life = (float)stream.ReceiveNext();
+            this.health = (float)stream.ReceiveNext();
         }
     }
 }

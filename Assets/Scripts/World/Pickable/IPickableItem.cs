@@ -6,5 +6,7 @@ public interface IPickableItem
 {
     void Use(Transform viewTransform);
     void OnPickup();
+
+    void ChangeOwner();
     
 }

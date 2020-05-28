@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Grenade : MonoBehaviour, IPickableItem
+public class Grenade : MonoBehaviourPun, IPickableItem
 {
 
     public float maxDamage = 100;
@@ -86,8 +87,14 @@ public class Grenade : MonoBehaviour, IPickableItem
 
 
     public void OnPickup()
-    {
+    {        
         this.GetComponent<Collider>().enabled = false;
         this.gameObject.SetActive(false);
+    }
+
+    public void ChangeOwner()
+    {
+        this.photonView.RequestOwnership();
+        Debug.Log("OwnerShip taken");
     }
 }

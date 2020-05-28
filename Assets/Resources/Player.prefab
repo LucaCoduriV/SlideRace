@@ -564,7 +564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37b94fc934260e44daf94ae702d0e657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  life: 100
+  health: 100
   inventory: []
   selectedObject: 0
   leftHandTransform: {fileID: 1024119452295707575}
