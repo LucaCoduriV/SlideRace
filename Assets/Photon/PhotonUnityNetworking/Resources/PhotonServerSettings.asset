@@ -37,6 +37,9 @@ MonoBehaviour:
   - Fire
   - RemoveLife
   - RespawnSpaceship
+  - Explode
+  - PickUpRoutine
+  - UseRoutine
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

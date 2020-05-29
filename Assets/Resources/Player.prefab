@@ -566,6 +566,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   inventory: []
+  inventory_remade: 
   selectedObject: 0
   leftHandTransform: {fileID: 1024119452295707575}
   cutDistance: 2

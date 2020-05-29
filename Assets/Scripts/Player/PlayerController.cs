@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     [SerializeField] private float health = 100.0f;
     [SerializeField] public List<GameObject> inventory;
+    [SerializeField] public List<int> inventory_remade;
     [SerializeField] private int selectedObject;
     [SerializeField] private Transform leftHandTransform;
     [SerializeField] private float cutDistance = 2;
@@ -270,12 +271,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //Executer la routine d'un object ramassé
         objectToPickUp.GetComponent<IPickableItem>().OnPickup();
         //puis l'ajouter dans l'inventaire
-        inventory.Add(objectToPickUp);
+        //inventory.Add(objectToPickUp);
+        inventory_remade.Add(objectToPickUp.GetPhotonView().ViewID);
         //le déplacer dans la main gauche
         objectToPickUp.transform.position = leftHandTransform.position;
         objectToPickUp.transform.parent = leftHandTransform;
         //Vérifier s'il y a un autre objet dans l'inventaire si non le séléctionner directement
-        if(inventory.Count == 1)
+        if(inventory.Count <= 1)
         {
             objectToPickUp.gameObject.SetActive(true);
         }

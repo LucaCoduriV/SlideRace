@@ -16,6 +16,7 @@ public class Grenade : MonoBehaviourPun, IPickableItem
     private bool isExploding = false;
     [SerializeField] private float speed = 10;
     [SerializeField] private Collider grenCollider;
+    [SerializeField] private GameObject explosionEffect;
 
     
 
@@ -34,6 +35,7 @@ public class Grenade : MonoBehaviourPun, IPickableItem
 
     public void Use(Transform viewTransform)
     {
+
         Vector3 currentSpeed = this.transform.parent.transform.parent.GetComponent<Rigidbody>().velocity;
 
         Debug.Log(currentSpeed);
@@ -44,26 +46,34 @@ public class Grenade : MonoBehaviourPun, IPickableItem
         body.velocity = currentSpeed;
 
         body.AddForce(viewTransform.forward * speed);
-        
+
         isActive = true;
         grenCollider.isTrigger = false;
         grenCollider.enabled = true;
         StartCoroutine(ExplodeAfterSec(timeToExplode));
-
     }
 
-    
 
+
+    
     private IEnumerator ExplodeAfterSec(float duration)
     {
         Debug.Log("grenade thrown");
         yield return new WaitForSeconds(duration);
-        Explode();
+
+
+        photonView.RPC("Explode", RpcTarget.All);
+
+        //Explode();
 
     }
+
+    [PunRPC]
     private void Explode()
     {
-        Debug.Log("BOOOOOM !!!");
+
+        Instantiate(explosionEffect, transform.position, transform.rotation);
+
         Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
 
         foreach(Collider player in colliders)
@@ -75,6 +85,8 @@ public class Grenade : MonoBehaviourPun, IPickableItem
                 player.GetComponent<PlayerController>().RemoveLife(damage);
             }
         }
+
+        Destroy(gameObject);
     }
 
     private float CalculateDamageFromDistance(Vector3 PointA, Vector3 PointB)
@@ -87,7 +99,14 @@ public class Grenade : MonoBehaviourPun, IPickableItem
 
 
     public void OnPickup()
-    {        
+    {
+        Debug.LogWarning("GRENADE WAS PICKED UP");
+        photonView.RPC("PickUpRoutine", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void PickUpRoutine()
+    {
         this.GetComponent<Collider>().enabled = false;
         this.gameObject.SetActive(false);
     }
