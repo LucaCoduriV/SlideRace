@@ -65,6 +65,22 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""NextItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""2a39bc17-9e90-45ab-93bd-af526dcbb834"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""PreviousItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""fc5bc4a0-9727-4225-a792-c9df99b2fe1c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -177,6 +193,28 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""action"": ""UseItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4678cc40-0b75-422f-b3bb-02aa15f143c7"",
+                    ""path"": ""<Mouse>/backButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PreviousItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""90b150af-8f70-447a-b4e3-5b9fea4657f9"",
+                    ""path"": ""<Mouse>/forwardButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NextItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -191,6 +229,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
         m_Player_LookX = m_Player.FindAction("LookX", throwIfNotFound: true);
         m_Player_LookY = m_Player.FindAction("LookY", throwIfNotFound: true);
         m_Player_UseItem = m_Player.FindAction("UseItem", throwIfNotFound: true);
+        m_Player_NextItem = m_Player.FindAction("NextItem", throwIfNotFound: true);
+        m_Player_PreviousItem = m_Player.FindAction("PreviousItem", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -246,6 +286,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_LookX;
     private readonly InputAction m_Player_LookY;
     private readonly InputAction m_Player_UseItem;
+    private readonly InputAction m_Player_NextItem;
+    private readonly InputAction m_Player_PreviousItem;
     public struct PlayerActions
     {
         private @InputMaster m_Wrapper;
@@ -256,6 +298,8 @@ public class @InputMaster : IInputActionCollection, IDisposable
         public InputAction @LookX => m_Wrapper.m_Player_LookX;
         public InputAction @LookY => m_Wrapper.m_Player_LookY;
         public InputAction @UseItem => m_Wrapper.m_Player_UseItem;
+        public InputAction @NextItem => m_Wrapper.m_Player_NextItem;
+        public InputAction @PreviousItem => m_Wrapper.m_Player_PreviousItem;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -283,6 +327,12 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @UseItem.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseItem;
                 @UseItem.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseItem;
                 @UseItem.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnUseItem;
+                @NextItem.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnNextItem;
+                @NextItem.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnNextItem;
+                @NextItem.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnNextItem;
+                @PreviousItem.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
+                @PreviousItem.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
+                @PreviousItem.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -305,6 +355,12 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @UseItem.started += instance.OnUseItem;
                 @UseItem.performed += instance.OnUseItem;
                 @UseItem.canceled += instance.OnUseItem;
+                @NextItem.started += instance.OnNextItem;
+                @NextItem.performed += instance.OnNextItem;
+                @NextItem.canceled += instance.OnNextItem;
+                @PreviousItem.started += instance.OnPreviousItem;
+                @PreviousItem.performed += instance.OnPreviousItem;
+                @PreviousItem.canceled += instance.OnPreviousItem;
             }
         }
     }
@@ -317,5 +373,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         void OnLookX(InputAction.CallbackContext context);
         void OnLookY(InputAction.CallbackContext context);
         void OnUseItem(InputAction.CallbackContext context);
+        void OnNextItem(InputAction.CallbackContext context);
+        void OnPreviousItem(InputAction.CallbackContext context);
     }
 }

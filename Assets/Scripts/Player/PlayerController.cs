@@ -63,6 +63,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         inputMaster = new InputMaster();
         inputMaster.Player.Shoot.performed += ctx => Cut();
         inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+        inputMaster.Player.NextItem.performed += ctx =>
+        {
+            photonView.RPC("NextObject", RpcTarget.All);
+        };
+        inputMaster.Player.PreviousItem.performed += ctx =>
+        {
+            photonView.RPC("PreviousObject", RpcTarget.All);
+        };
 
     }
 
@@ -179,33 +187,55 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         selectedObject = id;
     }
 
+    [PunRPC]
     public void NextObject()
     {
         disableAllItemsInventory();
 
-        if (selectedObject == (inventory.Count - 1))
+        selectedObject++;
+
+        if (inventory_remade.Count == 0)
         {
-            selectedObject = 0;
+            //aucun objet dans l'inventaire
+
+            return;
+        }
+        else if (!(selectedObject >= 0 && selectedObject < inventory_remade.Count))
+        {
+            //ça n'existe pas
+            selectedObject = -1;
+            NextObject();
         }
         else
         {
-            selectedObject++;
+            SelectItem(selectedObject);
         }
 
     }
+
+    [PunRPC]
     public void PreviousObject()
     {
         disableAllItemsInventory();
 
-        if (selectedObject == 0)
+        selectedObject--;
+
+        if(inventory_remade.Count == 0)
         {
-            selectedObject = (inventory.Count - 1);
+            //aucun objet dans l'inventaire
+
+            return;
+        }
+        else if(!(selectedObject >= 0 && selectedObject < inventory_remade.Count))
+        {
+            //ça n'existe pas
+            selectedObject = inventory_remade.Count;
+            PreviousObject();
         }
         else
         {
-            selectedObject--;
+            SelectItem(selectedObject);
         }
-
     }
 
     private void disableAllItemsInventory()
@@ -219,11 +249,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     private void UseSelectedItem()
     {
         
-
-        if(inventory.Count > 0)
+        //vérifier que l'on a bien un objet à utiliser
+        if(inventory_remade.Count > 0 && inventory_remade[selectedObject] != null)
         {
-            inventory[selectedObject].GetComponent<IPickableItem>().Use(mainCamera);
-            inventory.RemoveAt(selectedObject);      
+            PhotonView.Find(inventory_remade[selectedObject]).GetComponent<IPickableItem>().Use(mainCamera);
+            inventory_remade.RemoveAt(selectedObject);
+
+            //selectionner un autre objet dans l'inventaire
+            photonView.RPC("PreviousObject", RpcTarget.All);
         }
         else
         {
@@ -248,7 +281,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                     hit.transform.GetComponent<PlayerController>().SendRemoveLife(cutDamage);
                     
                 }
-                
             }
             else
             {
@@ -270,16 +302,37 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
         //Executer la routine d'un object ramassé
         objectToPickUp.GetComponent<IPickableItem>().OnPickup();
-        //puis l'ajouter dans l'inventaire
-        //inventory.Add(objectToPickUp);
-        inventory_remade.Add(objectToPickUp.GetPhotonView().ViewID);
+        //puis l'ajouter dans l'inventaire sur tout les clients
+        photonView.RPC("StoreItemInInventory", RpcTarget.All, objectToPickUp.GetPhotonView().ViewID);
+
         //le déplacer dans la main gauche
         objectToPickUp.transform.position = leftHandTransform.position;
         objectToPickUp.transform.parent = leftHandTransform;
-        //Vérifier s'il y a un autre objet dans l'inventaire si non le séléctionner directement
-        if(inventory.Count <= 1)
+
+        //Séléctionner l'objet ramasser automatiquement
+        selectedObject = inventory_remade.Count - 1;
+        photonView.RPC("SelectItem", RpcTarget.All, selectedObject);
+        
+        
+    }
+
+
+    [PunRPC]
+    private void StoreItemInInventory(int id)
+    {
+        inventory_remade.Add(id);
+    }
+
+    [PunRPC]
+    private void SelectItem(int id)
+    {
+        try
+        { 
+            PhotonView.Find(inventory_remade[id]).gameObject.SetActive(true);
+        }
+        catch
         {
-            objectToPickUp.gameObject.SetActive(true);
+            Debug.Log("Can not select this id");
         }
         
     }
