@@ -30,6 +30,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     private float verticalAxe;
     private bool doAJump;
     private Vector3 previousTargetSpeed = Vector3.zero;
+    private Vector3 MaxVelocity = Vector3.zero;
     #endregion
 
 
@@ -56,6 +57,21 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         }
 
         
+    }
+
+    void Update()
+    {
+        //update Animation
+
+        float yVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.forward);
+        float xVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.right);
+
+        GetComponent<Animator>().SetFloat("VelX", xVel / speed);
+        GetComponent<Animator>().SetFloat("VelY", yVel / speed);
+
+        Debug.Log(yVel / speed);
+
+
     }
 
     void FixedUpdate()
@@ -91,7 +107,16 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
                 GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
             }
+
+            //get MaxVelocity
+            if(MaxVelocity.sqrMagnitude < GetComponent<Rigidbody>().velocity.sqrMagnitude)
+            {
+                MaxVelocity = GetComponent<Rigidbody>().velocity;
+            }
+
             
+            
+
 
             // Jump
             if (canJump && doAJump && grounded)
