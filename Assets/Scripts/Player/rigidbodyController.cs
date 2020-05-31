@@ -14,8 +14,8 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
     public LayerMask groundMask;
 
     public float groundDistance = 0.4f;
-    public float speed = 500.0f;
-    public float maxVelocityChange = 10.0f;
+    
+    
     public bool canJump = true;
     public float jumpHeight = 2.0f;
 
@@ -28,8 +28,12 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
 
     public InputMaster inputMaster;
 
+    [Header("Ground movement")]
+    public float speed = 100.0f;
+    public float maxVelocityChange = 10.0f;
+
     #endregion
-     
+
     #region Private Fields
 
     float horizontalAxe;
@@ -48,16 +52,18 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
     {
         body.freezeRotation = true;
 
-        if (photonView.IsMine)
-        {
-            inputMaster = new InputMaster();
 
-            inputMaster.Player.Movement.performed += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-            inputMaster.Player.Movement.canceled += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-            inputMaster.Player.Jump.performed += ctx => doAJump = true;
-            inputMaster.Player.Jump.canceled += ctx => doAJump = false;
+        if (!photonView.IsMine && PhotonNetwork.IsConnected)
+        {
+            return;
         }
-        
+
+        inputMaster = new InputMaster();
+
+        inputMaster.Player.Movement.performed += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
+        inputMaster.Player.Movement.canceled += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
+        inputMaster.Player.Jump.performed += ctx => doAJump = true;
+        inputMaster.Player.Jump.canceled += ctx => doAJump = false;
     }
 
     void SetMovementSpeed(Vector2 movement)
@@ -66,13 +72,7 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
         verticalAxe = movement.y;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
+    
     void Update()
     {
         //horizontalAxe = Input.GetAxis("Horizontal");
@@ -116,32 +116,20 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
 
     private void movement()
     {
-        // Calculate how fast we should be moving
-        Vector3 targetVelocity = new Vector3(horizontalAxe, 0, verticalAxe);
-        targetVelocity = transform.TransformDirection(targetVelocity);
-        targetVelocity *= speed * Time.deltaTime;
+        //ne permet pas d'être plus rapide que la vitesse max et n'utilise ce système de déplacement uniquement sur le sol
+        if(isGrounded && body.velocity.sqrMagnitude < maxVelocityChange - (body.velocity.sqrMagnitude /2)) {
+            Vector3 forceToAdd = new Vector3(horizontalAxe, 0, verticalAxe);
+            forceToAdd = forceToAdd.normalized * speed * Time.deltaTime;
 
-        // Apply a force that attempts to reach our target velocity
-        Vector3 velocity = body.velocity;
-        Vector3 velocityChange = (targetVelocity - velocity);
-        velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
-        velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
-        velocityChange.y = 0;
-        body.AddForce(velocityChange, ForceMode.VelocityChange);
-
-
-        
-        isOnSlope = onSlope();
-        if ((horizontalAxe != 0 || verticalAxe != 0) && isOnSlope == true)
-        {
-            body.AddForce(Vector3.down * slopeForce);
+            body.AddForce(forceToAdd, ForceMode.VelocityChange);
         }
 
-        //jump
-        if (canJump && isGrounded && doAJump)
-        {
-            body.velocity = new Vector3(velocity.x, CalculateJumpVerticalSpeed(), velocity.z);
-        }
+
+        //isOnSlope = onSlope();
+        //if ((horizontalAxe != 0 || verticalAxe != 0) && isOnSlope == true)
+        //{
+        //    body.AddForce(Vector3.down * slopeForce);
+        //}
     }
 
     private void Jump()
@@ -171,7 +159,7 @@ public class rigidbodyController : MonoBehaviourPunCallbacks
 
         
 
-        if(Physics.Raycast(transform.position,Vector3.down,out hit,GetComponent<BoxCollider>().bounds.size.y / 2 * slopeForceRayLenght))
+        if(Physics.Raycast(transform.position,Vector3.down,out hit,GetComponent<Collider>().bounds.size.y / 2 * slopeForceRayLenght))
         {
             //checker si on se trouve bien sur un ground
             if(((1 << hit.transform.gameObject.layer) & groundMask) != 0)
