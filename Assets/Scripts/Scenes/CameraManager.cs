@@ -7,6 +7,7 @@ public class CameraManager : MonoBehaviour
     public bool isFollowingLocalPlayer = false;
     public float mouseSensitivity = 100f;
     public InputMaster inputMaster;
+    public GameObject mainCamera;
     
 
     float xRotation = 0.0f;
@@ -26,7 +27,7 @@ public class CameraManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        cameraTransform = Camera.main.transform;
+        cameraTransform = mainCamera.transform;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -36,14 +37,21 @@ public class CameraManager : MonoBehaviour
     void Update()
     {
         
+        
     }
 
     private void LateUpdate()
     {
         if (isFollowingLocalPlayer)
         {
-            Quaternion rotation = Quaternion.LookRotation(Vector3.up, Vector3.forward);
-            transform.rotation = rotation;
+
+
+
+            if (PlayerController.LocalPlayerInstance != null)
+            {
+                cameraTransform.position = PlayerController.LocalPlayerInstance.transform.GetChild(0).transform.position;
+
+            }
 
             RotateCamera();
         }
@@ -57,8 +65,6 @@ public class CameraManager : MonoBehaviour
     public void FollowLocalPlayer()
     {
         isFollowingLocalPlayer = true;
-        cameraTransform.parent = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform;
-        cameraTransform.position = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform.position;
     }
 
     public void RotateCamera()
@@ -69,8 +75,12 @@ public class CameraManager : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        cameraTransform.transform.rotation = Quaternion.Euler(xRotation, PlayerController.LocalPlayerInstance.transform.rotation.eulerAngles.y, PlayerController.LocalPlayerInstance.transform.rotation.eulerAngles.z);
+
         PlayerController.LocalPlayerInstance.transform.Rotate(Vector3.up * mouseX);
+
+
     }
 
     public void OnEnable()

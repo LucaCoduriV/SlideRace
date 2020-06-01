@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Grenade : MonoBehaviourPun, IPickableItem
+public class Grenade : MonoBehaviourPun, IPickableItem, IThrowableItem
 {
 
     public float maxDamage = 100;

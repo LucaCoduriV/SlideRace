@@ -17,7 +17,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     #region Private Fields
 
     [SerializeField] private float health = 100.0f;
-    [SerializeField] public List<GameObject> inventory;
     [SerializeField] public List<int> inventory_remade;
     [SerializeField] private int selectedObject;
     
@@ -25,12 +24,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] private float cutDamage = 25;
     [Header("Body Parts")]
     [SerializeField] public Transform leftHandTransform;
+    [SerializeField] public Transform rightHandTransform;
     [SerializeField] public Transform headTransform;
+    
 
     private Transform mainCamera;
     private InputMaster inputMaster;
     private bool isDead = false;
     private Animator animator;
+    private PhotonView contextObject;
 
 
     #endregion
@@ -59,6 +61,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             {
                 PlayerController.LocalPlayerInstance = this.gameObject;
 
+                //set LocalPlayer layer to all GameObject
+                SetLayerRecursively(this.gameObject, 9);
+
             }
         }
         
@@ -77,12 +82,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     }
 
+    
+
     // Start is called before the first frame update
     void Start()
     {
         mainCamera = Camera.main.transform;
         animator = GetComponent<Animator>();
-        inventory = new List<GameObject>();
         selectedObject = 0;
 
         //si c'est le joueur local on affiche son HUD
@@ -98,7 +104,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         Debug.DrawRay(mainCamera.position + mainCamera.forward, mainCamera.forward * cutDistance);
 
-        if(leftHandTransform != null)
+        if(rightHandTransform != null)
         {
             //ShowSelectedItem();
         }
@@ -177,10 +183,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void ShowSelectedItem()
     {
-        if(inventory.Count != 0)
+        if(inventory_remade.Count != 0)
         {
-            inventory[selectedObject].SetActive(true);
-            inventory[selectedObject].transform.position = leftHandTransform.position;
+            PhotonView.Find(inventory_remade[selectedObject]).gameObject.SetActive(true);
+            PhotonView.Find(inventory_remade[selectedObject]).gameObject.transform.position = rightHandTransform.position;
         }
         
     }
@@ -243,9 +249,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private void disableAllItemsInventory()
     {
-        for (int i = 0; i < inventory.Count; i++)
+        for (int i = 0; i < inventory_remade.Count; i++)
         {
-            inventory[i].SetActive(false);
+            
+            PhotonView.Find(inventory_remade[i]).gameObject.SetActive(false);
         }
     }
 
@@ -255,7 +262,26 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         //vérifier que l'on a bien un objet à utiliser
         if(inventory_remade.Count > 0 && inventory_remade[selectedObject] != null)
         {
-            PhotonView.Find(inventory_remade[selectedObject]).GetComponent<IPickableItem>().Use(mainCamera);
+            contextObject = PhotonView.Find(inventory_remade[selectedObject]);
+
+            
+            
+            if(contextObject.GetComponent<IThrowableItem>() != null)
+            {
+                //executer animation de lancement
+                GetComponent<Animator>().SetTrigger("Throw");
+                
+                
+
+            }
+            else //Default
+            {
+                if (contextObject.GetComponent<IPickableItem>() != null)
+                {
+                    contextObject.GetComponent<IPickableItem>().Use(mainCamera);
+                }
+            }
+
             inventory_remade.RemoveAt(selectedObject);
 
             //selectionner un autre objet dans l'inventaire
@@ -267,6 +293,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
         
     }
+
+    public void OnThrow()
+    {
+        contextObject.GetComponent<IPickableItem>().Use(mainCamera);
+    }
+
 
     private void Cut()
     {
@@ -309,8 +341,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         photonView.RPC("StoreItemInInventory", RpcTarget.All, objectToPickUp.GetPhotonView().ViewID);
 
         //le déplacer dans la main gauche
-        objectToPickUp.transform.position = leftHandTransform.position;
-        objectToPickUp.transform.parent = leftHandTransform;
+        objectToPickUp.transform.position = rightHandTransform.position;
+        objectToPickUp.transform.parent = rightHandTransform;
 
         //Séléctionner l'objet ramasser automatiquement
         selectedObject = inventory_remade.Count - 1;
@@ -383,6 +415,25 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         {
             // Network player, receive data
             this.health = (float)stream.ReceiveNext();
+        }
+    }
+
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (null == obj)
+        {
+            return;
+        }
+
+        obj.layer = newLayer;
+
+        foreach (Transform child in obj.transform)
+        {
+            if (null == child)
+            {
+                continue;
+            }
+            SetLayerRecursively(child.gameObject, newLayer);
         }
     }
 }
