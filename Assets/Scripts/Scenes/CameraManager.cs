@@ -42,6 +42,9 @@ public class CameraManager : MonoBehaviour
     {
         if (isFollowingLocalPlayer)
         {
+            Quaternion rotation = Quaternion.LookRotation(Vector3.up, Vector3.forward);
+            transform.rotation = rotation;
+
             RotateCamera();
         }
     }
@@ -54,8 +57,8 @@ public class CameraManager : MonoBehaviour
     public void FollowLocalPlayer()
     {
         isFollowingLocalPlayer = true;
-        cameraTransform.parent = PlayerController.LocalPlayerInstance.transform.Find("Head").transform;
-        cameraTransform.position = PlayerController.LocalPlayerInstance.transform.Find("Head").transform.position;
+        cameraTransform.parent = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform;
+        cameraTransform.position = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform.position;
     }
 
     public void RotateCamera()

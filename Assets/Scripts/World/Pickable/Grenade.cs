@@ -36,7 +36,7 @@ public class Grenade : MonoBehaviourPun, IPickableItem
     public void Use(Transform viewTransform)
     {
 
-        Vector3 currentSpeed = this.transform.parent.transform.parent.GetComponent<Rigidbody>().velocity;
+        Vector3 currentSpeed = this.transform.root.GetComponent<Rigidbody>().velocity;
 
         Debug.Log(currentSpeed);
 

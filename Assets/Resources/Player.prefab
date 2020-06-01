@@ -529,8 +529,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   groundDistance: 0.4
-  speed: 501
-  maxVelocityChange: 10
   canJump: 1
   jumpHeight: 2
   slopeForce: 15
@@ -538,6 +536,8 @@ MonoBehaviour:
   isOnSlope: 0
   maxStepHeight: 0.7
   stepSearchOvershoot: 0.01
+  speed: 501
+  maxVelocityChange: 10
   player: {fileID: 1024119451343493610}
 --- !u!65 &1024119451343493611
 BoxCollider:

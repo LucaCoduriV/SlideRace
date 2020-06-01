@@ -62,15 +62,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     void Update()
     {
         //update Animation
-
-        float yVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.forward);
-        float xVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.right);
-
-        GetComponent<Animator>().SetFloat("VelX", xVel / speed);
-        GetComponent<Animator>().SetFloat("VelY", yVel / speed);
-
-        Debug.Log(yVel / speed);
-
+        UpdateAnimationSpeed();
 
     }
 
@@ -97,11 +89,12 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
             if (grounded)
             {
-
+                GetComponent<Animator>().SetBool("OnGround", true);
                 GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
             }
             else
             {
+                GetComponent<Animator>().SetBool("OnGround", false);
                 velocityChange.x /= inAirSpeedDivider;
                 velocityChange.y /= inAirSpeedDivider;
 
@@ -121,6 +114,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             // Jump
             if (canJump && doAJump && grounded)
             {
+                GetComponent<Animator>().SetTrigger("Jump");
                 GetComponent<Rigidbody>().velocity = new Vector3(velocity.x, CalculateJumpVerticalSpeed(), velocity.z);
                 doAJump = false;
             }
@@ -137,6 +131,14 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         grounded = true;
     }
 
+    private void UpdateAnimationSpeed()
+    {
+        float yVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.forward);
+        float xVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.right);
+
+        GetComponent<Animator>().SetFloat("VelX", xVel / speed);
+        GetComponent<Animator>().SetFloat("VelY", yVel / speed);
+    }
 
     float CalculateJumpVerticalSpeed()
     {

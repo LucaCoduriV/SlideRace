@@ -20,9 +20,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] public List<GameObject> inventory;
     [SerializeField] public List<int> inventory_remade;
     [SerializeField] private int selectedObject;
-    [SerializeField] private Transform leftHandTransform;
+    
     [SerializeField] private float cutDistance = 2;
     [SerializeField] private float cutDamage = 25;
+    [Header("Body Parts")]
+    [SerializeField] public Transform leftHandTransform;
+    [SerializeField] public Transform headTransform;
 
     private Transform mainCamera;
     private InputMaster inputMaster;
