@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class PickableItem : MonoBehaviourPun
 {
+    public bool readyToUse = false;
+
     public virtual void Use(Transform viewTransform)
     {
         Debug.Log("No action defined for this object");

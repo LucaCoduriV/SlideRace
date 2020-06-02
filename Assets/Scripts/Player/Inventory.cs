@@ -128,9 +128,10 @@ public class Inventory : MonoBehaviourPunCallbacks
                 //executer animation de lancement
                 animator.SetTrigger("Throw");
             }
-            else if(contextObject.GetComponent<Knife>() != null)
+            else if(contextObject.GetComponent<Knife>() != null && contextObject.GetComponent<Knife>().readyToUse)
             {
                 //executer animation d'attaque elle change selon l'item qui se trouve en main
+                contextObject.GetComponent<Knife>().readyToUse = false;
                 animator.SetTrigger("Attack");
                 oneUse = false;
             }

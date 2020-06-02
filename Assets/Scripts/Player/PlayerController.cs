@@ -24,7 +24,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] public Transform leftHandTransform;
     [SerializeField] public Transform rightHandTransform;
     [SerializeField] public Transform headTransform;
-    
+
+    [Header("Class Instance")]
+    [SerializeField] private Inventory inventory;
 
     private Transform mainCamera;
     private InputMaster inputMaster;
@@ -75,12 +77,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         inputMaster.Player.NextItem.performed += ctx =>
         {
             //changement d'arme
-            photonView.RPC("NextObject", RpcTarget.All);
+            inventory.photonView.RPC("NextObject", RpcTarget.All);
         };
         inputMaster.Player.PreviousItem.performed += ctx =>
         {
             //changement d'arme
-            photonView.RPC("PreviousObject", RpcTarget.All);
+            inventory.photonView.RPC("PreviousObject", RpcTarget.All);
         };
 
     }

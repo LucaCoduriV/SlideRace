@@ -169,6 +169,7 @@ MonoBehaviour:
   leftHandTransform: {fileID: 5999482715748416824}
   rightHandTransform: {fileID: 2359901365935933126}
   headTransform: {fileID: 2143396888221401376}
+  inventory: {fileID: 2619902981751206456}
 --- !u!114 &1843834688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,11 +183,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gravity: 10
-  maxVelocityChange: 10
+  maxVelocityChange: 20
+  acceleration: 5
   speed: 10
   canJump: 1
   jumpHeight: 2
-  inAirSpeedDivider: 20
+  inAirSpeedMultiplier: 2
 --- !u!114 &2619902981751206456
 MonoBehaviour:
   m_ObjectHideFlags: 0

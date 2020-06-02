@@ -30,8 +30,9 @@ public class Boost : MonoBehaviour
         Rigidbody body = other.GetComponent<Rigidbody>();
 
         if(other.tag == "Player")
-        body.AddForce(rotRight * rotUp * Vector3.forward * (speed));
-       
+        //body.AddForce(rotRight * rotUp * Vector3.forward * (speed));
+        body.AddForce(rotUp * Vector3.forward * (speed), ForceMode.VelocityChange);
+
 
     }
 }

@@ -14,6 +14,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     [Header("General")]
     public float gravity = 10.0f;
     public float maxVelocityChange = 10.0f;
+    public float acceleration = 5f;
 
     [Header("On ground")]
     public float speed = 10.0f;
@@ -22,7 +23,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
     [Header("In air")]
     [Tooltip("Permet de modifier le control dans les airs")]
-    public float inAirSpeedDivider = 10;
+    public float inAirSpeedMultiplier = 2f;
 
     #region Private Fields
     private bool grounded = false;
@@ -75,7 +76,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             Vector3 targetVelocity = new Vector3(horizontalAxe, 0, verticalAxe);
 
             //permet d'augmenter la vitesse petit à petit
-            previousTargetSpeed = Vector3.Lerp(previousTargetSpeed, targetVelocity, 5f * Time.fixedDeltaTime);
+            previousTargetSpeed = Vector3.Lerp(previousTargetSpeed, targetVelocity, acceleration * Time.fixedDeltaTime);
 
             targetVelocity = transform.TransformDirection(previousTargetSpeed);
             targetVelocity *= speed;
@@ -87,6 +88,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
             velocityChange.y = 0;
 
+
+
             if (grounded)
             {
                 GetComponent<Animator>().SetBool("OnGround", true);
@@ -95,10 +98,9 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             else
             {
                 GetComponent<Animator>().SetBool("OnGround", false);
-                velocityChange.x /= inAirSpeedDivider;
-                velocityChange.y /= inAirSpeedDivider;
+                velocityChange *= inAirSpeedMultiplier;
 
-                GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
+                GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.Acceleration);
             }
 
             //get MaxVelocity
