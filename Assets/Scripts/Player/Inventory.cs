@@ -215,7 +215,7 @@ public class Inventory : MonoBehaviourPunCallbacks
         }
         else
         {
-            animator.runtimeAnimatorController = animatorKnife;
+            animator.runtimeAnimatorController = animatorDefault;
         }
     }
 
