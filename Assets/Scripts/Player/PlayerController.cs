@@ -16,12 +16,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     #region Private Fields
 
+    [Header("Player Properties")]
     [SerializeField] private float health = 100.0f;
-    [SerializeField] public List<int> inventory_remade;
-    [SerializeField] private int selectedObject;
-    
-    [SerializeField] private float cutDistance = 2;
-    [SerializeField] private float cutDamage = 25;
+
+
     [Header("Body Parts")]
     [SerializeField] public Transform leftHandTransform;
     [SerializeField] public Transform rightHandTransform;
@@ -30,18 +28,21 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     private Transform mainCamera;
     private InputMaster inputMaster;
-    private bool isDead = false;
     private Animator animator;
-    private PhotonView contextObject;
-
 
     #endregion
 
+    #region Getter/Setter
+    private bool isDead = false;
+
     public bool IsDead { get => isDead; }
-    public float Health { get => health;}
+    public float Health { get => health; }
+    #endregion
 
 
-    
+
+
+
 
     void Awake()
     {
@@ -69,14 +70,16 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         
 
         inputMaster = new InputMaster();
-        inputMaster.Player.Shoot.performed += ctx => Cut();
-        inputMaster.Player.UseItem.performed += ctx => UseSelectedItem();
+        inputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
+        inputMaster.Player.UseItem.performed += ctx => { /*rien*/ };
         inputMaster.Player.NextItem.performed += ctx =>
         {
+            //changement d'arme
             photonView.RPC("NextObject", RpcTarget.All);
         };
         inputMaster.Player.PreviousItem.performed += ctx =>
         {
+            //changement d'arme
             photonView.RPC("PreviousObject", RpcTarget.All);
         };
 
@@ -89,10 +92,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         mainCamera = Camera.main.transform;
         animator = GetComponent<Animator>();
-        selectedObject = 0;
+
 
         //si c'est le joueur local on affiche son HUD
-        if(LocalPlayerInstance == this.gameObject)
+        if (LocalPlayerInstance == this.gameObject)
         {
             HUDController.SetPlayerToShowHUD(this);
         }
@@ -102,7 +105,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     // Update is called once per frame
     void Update()
     {
-        Debug.DrawRay(mainCamera.position + mainCamera.forward, mainCamera.forward * cutDistance);
 
         if(rightHandTransform != null)
         {
@@ -131,7 +133,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void SendRemoveLife(float quantity)
     {
-        photonView.RPC("RemoveLife", RpcTarget.Others, cutDamage);
+        photonView.RPC("RemoveLife", RpcTarget.Others, quantity);
         
     }
 
@@ -181,206 +183,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     }
 
 
-    private void ShowSelectedItem()
-    {
-        if(inventory_remade.Count != 0)
-        {
-            PhotonView.Find(inventory_remade[selectedObject]).gameObject.SetActive(true);
-            PhotonView.Find(inventory_remade[selectedObject]).gameObject.transform.position = rightHandTransform.position;
-        }
-        
-    }
-
-    public void SelectObjectID(int id)
-    {
-        selectedObject = id;
-    }
-
-    [PunRPC]
-    public void NextObject()
-    {
-        disableAllItemsInventory();
-
-        selectedObject++;
-
-        if (inventory_remade.Count == 0)
-        {
-            //aucun objet dans l'inventaire
-
-            return;
-        }
-        else if (!(selectedObject >= 0 && selectedObject < inventory_remade.Count))
-        {
-            //ça n'existe pas
-            selectedObject = -1;
-            NextObject();
-        }
-        else
-        {
-            SelectItem(selectedObject);
-        }
-
-    }
-
-    [PunRPC]
-    public void PreviousObject()
-    {
-        disableAllItemsInventory();
-
-        selectedObject--;
-
-        if(inventory_remade.Count == 0)
-        {
-            //aucun objet dans l'inventaire
-
-            return;
-        }
-        else if(!(selectedObject >= 0 && selectedObject < inventory_remade.Count))
-        {
-            //ça n'existe pas
-            selectedObject = inventory_remade.Count;
-            PreviousObject();
-        }
-        else
-        {
-            SelectItem(selectedObject);
-        }
-    }
-
-    private void disableAllItemsInventory()
-    {
-        for (int i = 0; i < inventory_remade.Count; i++)
-        {
-            
-            PhotonView.Find(inventory_remade[i]).gameObject.SetActive(false);
-        }
-    }
-
-    private void UseSelectedItem()
-    {
-        
-        //vérifier que l'on a bien un objet à utiliser
-        if(inventory_remade.Count > 0 && inventory_remade[selectedObject] != null)
-        {
-            contextObject = PhotonView.Find(inventory_remade[selectedObject]);
-
-            
-            
-            if(contextObject.GetComponent<IThrowableItem>() != null)
-            {
-                //executer animation de lancement
-                GetComponent<Animator>().SetTrigger("Throw");
-                
-                
-
-            }
-            else //Default
-            {
-                if (contextObject.GetComponent<IPickableItem>() != null)
-                {
-                    contextObject.GetComponent<IPickableItem>().Use(mainCamera);
-                }
-            }
-
-            inventory_remade.RemoveAt(selectedObject);
-
-            //selectionner un autre objet dans l'inventaire
-            photonView.RPC("PreviousObject", RpcTarget.All);
-        }
-        else
-        {
-            Debug.LogWarning("No item in inventory !!");
-        }
-        
-    }
-
-    public void OnThrow()
-    {
-        contextObject.GetComponent<IPickableItem>().Use(mainCamera);
-    }
-
-
-    private void Cut()
-    {
-        if (!this.animator.GetCurrentAnimatorStateInfo(0).IsName("Cut") && !this.animator.IsInTransition(0) && !isDead)
-        {
-            animator.SetTrigger("Shoot1");
-
-            RaycastHit hit;
-
-            if(Physics.Raycast(mainCamera.position + mainCamera.forward.normalized, mainCamera.forward.normalized, out hit, cutDistance))
-            {
-                Debug.Log("TOUCHE!! " + hit.transform.gameObject.name);
-                if (hit.transform.CompareTag("Player"))
-                {
-                    hit.transform.GetComponent<PlayerController>().SendRemoveLife(cutDamage);
-                    
-                }
-            }
-            else
-            {
-                Debug.Log("RATE!!!");
-            }
-        }
-        
-    }
-
-    public void PickupObject(GameObject objectToPickUp)
-    {
-        //checker s'il y a la place pour rammasser l'objet
-
-        
-        //modifier le owner de l'objet
-        if (photonView.IsMine)
-        {
-            objectToPickUp.GetComponent<IPickableItem>().ChangeOwner();
-        }
-        //Executer la routine d'un object ramassé
-        objectToPickUp.GetComponent<IPickableItem>().OnPickup();
-        //puis l'ajouter dans l'inventaire sur tout les clients
-        photonView.RPC("StoreItemInInventory", RpcTarget.All, objectToPickUp.GetPhotonView().ViewID);
-
-        //le déplacer dans la main gauche
-        objectToPickUp.transform.position = rightHandTransform.position;
-        objectToPickUp.transform.parent = rightHandTransform;
-
-        //Séléctionner l'objet ramasser automatiquement
-        selectedObject = inventory_remade.Count - 1;
-        photonView.RPC("SelectItem", RpcTarget.All, selectedObject);
-        
-        
-    }
-
-
-    [PunRPC]
-    private void StoreItemInInventory(int id)
-    {
-        inventory_remade.Add(id);
-    }
-
-    [PunRPC]
-    private void SelectItem(int id)
-    {
-        try
-        { 
-            PhotonView.Find(inventory_remade[id]).gameObject.SetActive(true);
-        }
-        catch
-        {
-            Debug.Log("Can not select this id");
-        }
-        
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.transform.tag.Contains("Pickable"))
-        {
-            PickupObject(other.gameObject);
-        }
-        
-    }
-
     public void OnEnable()
     {
         if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
@@ -392,14 +194,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void OnDisable()
     {
-        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
-        {
-            return;
-        }
-        if(this == PlayerController.LocalPlayerInstance)
-        {
-            PlayerController.LocalPlayerInstance = null;
-        }
 
         inputMaster.Disable();
     }

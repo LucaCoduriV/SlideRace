@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Grenade : MonoBehaviourPun, IPickableItem, IThrowableItem
+public class Grenade : PickableItem, IThrowableItem
 {
 
     public float maxDamage = 100;
@@ -33,7 +33,7 @@ public class Grenade : MonoBehaviourPun, IPickableItem, IThrowableItem
     }
 
 
-    public void Use(Transform viewTransform)
+    public override void Use(Transform viewTransform)
     {
 
         Vector3 currentSpeed = this.transform.root.GetComponent<Rigidbody>().velocity;
@@ -98,22 +98,25 @@ public class Grenade : MonoBehaviourPun, IPickableItem, IThrowableItem
     }
 
 
-    public void OnPickup()
+    public override void OnPickup()
     {
         Debug.LogWarning("GRENADE WAS PICKED UP");
-        photonView.RPC("PickUpRoutine", RpcTarget.All);
+        if (PhotonNetwork.IsConnected)
+        {
+            photonView.RPC("OnPickupCallback", RpcTarget.All);
+        }
+        else
+        {
+            OnPickupCallback();
+        }
+        
     }
 
     [PunRPC]
-    private void PickUpRoutine()
+    public override void OnPickupCallback()
     {
+        Debug.Log("OUF C?EST BON !!");
         this.GetComponent<Collider>().enabled = false;
         this.gameObject.SetActive(false);
-    }
-
-    public void ChangeOwner()
-    {
-        this.photonView.RequestOwnership();
-        Debug.Log("OwnerShip taken");
     }
 }

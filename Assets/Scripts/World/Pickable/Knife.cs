@@ -3,40 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Knife : MonoBehaviourPun, IPickableItem
+public class Knife : PickableItem
 {
-    public void ChangeOwner()
-    {
-        throw new System.NotImplementedException();
-    }
+    [SerializeField] private AnimatorOverrideController animatorOverrideController;
 
-    public void OnPickup()
-    {
-        Debug.LogWarning("GRENADE WAS PICKED UP");
-        photonView.RPC("PickUpRoutine", RpcTarget.All);
-    }
+    [SerializeField] private float hitDistance = 2f;
+    [SerializeField] private float damage = 25f;
 
-    [PunRPC]
-    private void PickUpRoutine()
+    public override void Use(Transform viewTransform)
     {
-        this.gameObject.SetActive(false);
-    }
+        Debug.DrawRay(viewTransform.position, viewTransform.forward * hitDistance, Color.green);
 
-    public void Use(Transform viewTransform)
-    {
-        throw new System.NotImplementedException();
-    }
+        //RAYCAST d'une certaine distzance
+        RaycastHit hit;
+        Ray ray = new Ray(viewTransform.position, viewTransform.forward);
+        Physics.Raycast(ray, out hit, hitDistance);
 
-    
+        //récupérer l'objet touché et vérifier s'il s'agit d'un joueur
+        if(hit.collider != null)
+        {
+            PlayerController player = hit.collider.gameObject.GetComponent<PlayerController>();
+            if(player != null)
+            {
+                //lui enlever de la vie
+                player.SendRemoveLife(damage);
+            }
+        }
 
-    // Start is called before the first frame update
-    void Start()
-    {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         
     }

@@ -76,6 +76,7 @@ GameObject:
   - component: {fileID: 8663504789373274114}
   - component: {fileID: 1932595955}
   - component: {fileID: 1843834688}
+  - component: {fileID: 2619902981751206456}
   - component: {fileID: 1932595953}
   - component: {fileID: 1932595954}
   - component: {fileID: 8142379199251414120}
@@ -165,10 +166,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  inventory_remade: 
-  selectedObject: 0
-  cutDistance: 2
-  cutDamage: 25
   leftHandTransform: {fileID: 5999482715748416824}
   rightHandTransform: {fileID: 2359901365935933126}
   headTransform: {fileID: 2143396888221401376}
@@ -190,6 +187,22 @@ MonoBehaviour:
   canJump: 1
   jumpHeight: 2
   inAirSpeedDivider: 20
+--- !u!114 &2619902981751206456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800267042043753921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40b49af7bf6f564409ac20df389078c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventory_remade: 
+  selectedObject: 0
+  animatorKnife: {fileID: 22100000, guid: ee8479ea3325ad443bd011bb970f6d02, type: 2}
+  animatorDefault: {fileID: 9100000, guid: 80c2458c3e4b7d8408d5b3c32753754c, type: 2}
 --- !u!114 &1932595953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,6 +239,7 @@ MonoBehaviour:
   - {fileID: 1932595953}
   - {fileID: 1932595955}
   - {fileID: 8142379199251414120}
+  - {fileID: 0}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -259,6 +273,9 @@ MonoBehaviour:
   - Type: 9
     SynchronizeType: 0
     Name: Throw
+  - Type: 9
+    SynchronizeType: 0
+    Name: Attack
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0
