@@ -100,7 +100,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
                 GetComponent<Animator>().SetBool("OnGround", false);
                 velocityChange *= inAirSpeedMultiplier;
 
-                GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.Acceleration);
+                GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
             }
 
             //get MaxVelocity
