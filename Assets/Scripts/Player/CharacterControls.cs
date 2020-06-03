@@ -117,7 +117,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             if (canJump && doAJump && grounded)
             {
                 GetComponent<Animator>().SetTrigger("Jump");
-                GetComponent<Rigidbody>().velocity = new Vector3(velocity.x, CalculateJumpVerticalSpeed(), velocity.z);
+                //GetComponent<Rigidbody>().velocity = new Vector3(velocity.x, CalculateJumpVerticalSpeed(), velocity.z);
+                GetComponent<Rigidbody>().AddForce(new Vector3(0f, CalculateJumpVerticalSpeed(), 0f), ForceMode.Impulse);
                 doAJump = false;
             }
         }
