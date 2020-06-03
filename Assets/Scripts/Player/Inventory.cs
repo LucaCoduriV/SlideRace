@@ -176,6 +176,8 @@ public class Inventory : MonoBehaviourPunCallbacks
         objectToPickUp.transform.position = rightHandTransform.position;
         objectToPickUp.transform.parent = rightHandTransform;
 
+        objectToPickUp.GetComponent<PickableItem>().OnStoredInInventory();
+
         //Séléctionner l'objet ramasser automatiquement
         selectedObject = inventory_remade.Count - 1;
         photonView.RPC("SelectItem", RpcTarget.All, selectedObject);

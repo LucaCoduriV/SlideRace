@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b093ed2d22211240a05c4bbb2cb8c87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  speed: 2
   angleUp: 45
   angleRight: 0
 --- !u!65 &446370780
@@ -238,6 +238,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
+      propertyPath: gravity
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
+      propertyPath: maxVelocityChange
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
+      propertyPath: acceleration
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
+      propertyPath: speed
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
+      propertyPath: jumpHeight
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1932595954, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
       propertyPath: viewIdField
       value: 1
@@ -312,6 +332,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5291413516483946659, guid: 5a00b252a592c1a4db1c34ad8c51576d,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6037713821466503848, guid: 5a00b252a592c1a4db1c34ad8c51576d,
         type: 3}
@@ -771,7 +796,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isFollowingLocalPlayer: 1
-  mouseSensitivity: 100
+  mouseSensitivity: 50
   mainCamera: {fileID: 1893007158}
 --- !u!1001 &1908163105
 PrefabInstance:

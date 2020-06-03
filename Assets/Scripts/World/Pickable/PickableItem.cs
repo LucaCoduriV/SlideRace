@@ -25,6 +25,19 @@ public class PickableItem : MonoBehaviourPun
         }
     }
 
+    public virtual void OnStoredInInventory()
+    {
+        Debug.LogWarning("OBJECT WAS PICKED UP");
+        if (PhotonNetwork.IsConnected)
+        {
+            photonView.RPC("OnStoredInInventoryCallback", RpcTarget.All);
+        }
+        else
+        {
+            OnStoredInInventoryCallback();
+        }
+    }
+
     public virtual void ChangeOwner()
     {
         this.photonView.RequestOwnership();
@@ -43,8 +56,13 @@ public class PickableItem : MonoBehaviourPun
         {
             this.GetComponent<Collider>().enabled = false;
         }
-        Debug.Log("coucou");
         
         this.gameObject.SetActive(false);
+    }
+
+    [PunRPC]
+    public virtual void OnStoredInInventoryCallback()
+    {
+        Debug.Log("I am executed after i got stored in inventory");
     }
 }

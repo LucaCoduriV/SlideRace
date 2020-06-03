@@ -41,4 +41,11 @@ public class Knife : PickableItem
         }
         
     }
+
+    public override void OnStoredInInventory()
+    {
+        //mettre le couteau dans la bonne position pour le joueur
+        this.transform.localPosition = new Vector3(0f, 0.01f, 0.02f);
+        this.transform.localRotation = Quaternion.Euler(-358.4f, 186.7f, -91.6f);
+    }
 }

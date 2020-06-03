@@ -12,18 +12,20 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
 
     [Header("General")]
-    public float gravity = 10.0f;
+    public float gravity = 20.0f;
     public float maxVelocityChange = 10.0f;
-    public float acceleration = 5f;
+    public float acceleration = 4f;
 
     [Header("On ground")]
-    public float speed = 10.0f;
+    public float speed = 7.0f;
     public bool canJump = true;
-    public float jumpHeight = 2.0f;
+    public float jumpHeight = 1.5f;
 
     [Header("In air")]
     [Tooltip("Permet de modifier le control dans les airs")]
     public float inAirSpeedMultiplier = 2f;
+
+    [Header("In Boost")]
 
     #region Private Fields
     private bool grounded = false;
@@ -98,8 +100,6 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             else
             {
                 GetComponent<Animator>().SetBool("OnGround", false);
-                velocityChange *= inAirSpeedMultiplier;
-
                 GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
             }
 
