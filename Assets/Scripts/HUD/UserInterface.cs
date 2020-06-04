@@ -6,22 +6,33 @@ using UnityEngine;
 public class UserInterface : MonoBehaviourPunCallbacks
 {
     public InputMaster inputMaster;
-    
-
+    public static UserInterface instance;
+    public bool followMouse = true;
     
 
     [Header("Pause Panel")]
     public GameObject PausePanel;
-    private bool IsPauseOpen = false;
+    private bool isPauseOpen = false;
+    
 
     [Header("Options Panel")]
     public GameObject OptionsPanel;
     public TMPro.TMP_InputField sensitivityInput;
     private bool IsOptionsOpen = false;
 
+    
 
     void Awake()
     {
+        if(instance == null)
+        {
+            instance = this.GetComponent<UserInterface>();
+        }
+        else
+        {
+            Destroy(this.GetComponent<UserInterface>());
+        }
+
         inputMaster = new InputMaster();
 
         inputMaster.UI.Pause.performed += ctx =>
@@ -32,12 +43,12 @@ public class UserInterface : MonoBehaviourPunCallbacks
 
     public void TogglePauseMenu()
     {
-        IsPauseOpen = !IsPauseOpen;
+        isPauseOpen = !isPauseOpen;
 
         if(PausePanel != null)
         {
-            PausePanel.SetActive(IsPauseOpen);
-            ShowMouse(IsPauseOpen);
+            PausePanel.SetActive(isPauseOpen);
+            ShowMouse(isPauseOpen);
             CloseAllPanel();
         }
         else
@@ -48,12 +59,12 @@ public class UserInterface : MonoBehaviourPunCallbacks
     }
     public void TogglePauseMenu(bool status)
     {
-        IsPauseOpen = status;
+        isPauseOpen = status;
 
         if (PausePanel != null)
         {
-            PausePanel.SetActive(IsPauseOpen);
-            ShowMouse(IsPauseOpen);
+            PausePanel.SetActive(isPauseOpen);
+            ShowMouse(isPauseOpen);
             if (status)
             {
                 CloseAllPanel();
@@ -91,11 +102,13 @@ public class UserInterface : MonoBehaviourPunCallbacks
         {
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
+            followMouse = false;
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            followMouse = true;
         }
         
     }

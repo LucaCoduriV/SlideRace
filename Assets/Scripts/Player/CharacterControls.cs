@@ -15,6 +15,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     public float gravity = 20.0f;
     public float maxVelocityChange = 10.0f;
     public float acceleration = 4f;
+    
 
     [Header("On ground")]
     public float speed = 7.0f;
@@ -32,8 +33,11 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     private float horizontalAxe;
     private float verticalAxe;
     private bool doAJump;
+    private bool isCrouching;
     private Vector3 previousTargetSpeed = Vector3.zero;
     private Vector3 MaxVelocity = Vector3.zero;
+    private Vector4 capsuleColliderDefault;
+    private Vector3 DefaultCameraPosition;
     #endregion
 
 
@@ -61,9 +65,15 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             };
             inputMaster.Player.Jump.performed += ctx => { if (GetComponent<PlayerController>().IsDead == false) doAJump = true; };
             inputMaster.Player.Jump.canceled += ctx => doAJump = false;
+            inputMaster.Player.Crouch.performed += ctx => { Crouch(true); };
+            inputMaster.Player.Crouch.canceled += ctx => { Crouch(false); };
         }
 
+        capsuleColliderDefault = GetComponent<CapsuleCollider>().center;
+        capsuleColliderDefault.w = GetComponent<CapsuleCollider>().height;
         
+
+
     }
 
     void Update()
@@ -137,10 +147,43 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         grounded = true;
     }
 
+    private void Crouch(bool status)
+    {
+        isCrouching = status;
+
+        if (status)
+        {
+            GetComponent<Animator>().SetBool("Crouch", true);
+            //déplacer le collider
+            GetComponent<CapsuleCollider>().center = new Vector3(GetComponent<CapsuleCollider>().center.x, 0.64f, GetComponent<CapsuleCollider>().center.z);
+            GetComponent<CapsuleCollider>().height = 1.3f;
+
+            //Déplacer la camera
+            transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y - 0.6f, transform.GetChild(0).transform.localPosition.z);
+
+
+        }
+        else
+        {
+            GetComponent<Animator>().SetBool("Crouch", false);
+            //déplacer le collider
+            GetComponent<CapsuleCollider>().center = capsuleColliderDefault;
+            GetComponent<CapsuleCollider>().height = capsuleColliderDefault.w;
+
+            //Déplacer la camera
+            transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y + 0.6f, transform.GetChild(0).transform.localPosition.z);
+        }
+    }
     private void UpdateAnimationSpeed()
     {
         float yVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.forward);
         float xVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.right);
+
+        if (isCrouching)
+        {
+            yVel /= 2;
+            xVel /= 2;
+        }
 
         GetComponent<Animator>().SetFloat("VelX", xVel / speed);
         GetComponent<Animator>().SetFloat("VelY", yVel / speed);

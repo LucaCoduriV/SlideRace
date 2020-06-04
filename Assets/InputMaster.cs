@@ -81,6 +81,14 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Crouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""fed34f6c-f9c9-47b3-af62-e0925bcedc7c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -215,6 +223,17 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""action"": ""NextItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""98832264-d147-4b31-9416-36c0bf4ea74c"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -258,6 +277,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         m_Player_UseItem = m_Player.FindAction("UseItem", throwIfNotFound: true);
         m_Player_NextItem = m_Player.FindAction("NextItem", throwIfNotFound: true);
         m_Player_PreviousItem = m_Player.FindAction("PreviousItem", throwIfNotFound: true);
+        m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -318,6 +338,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_UseItem;
     private readonly InputAction m_Player_NextItem;
     private readonly InputAction m_Player_PreviousItem;
+    private readonly InputAction m_Player_Crouch;
     public struct PlayerActions
     {
         private @InputMaster m_Wrapper;
@@ -330,6 +351,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         public InputAction @UseItem => m_Wrapper.m_Player_UseItem;
         public InputAction @NextItem => m_Wrapper.m_Player_NextItem;
         public InputAction @PreviousItem => m_Wrapper.m_Player_PreviousItem;
+        public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -363,6 +385,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @PreviousItem.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
                 @PreviousItem.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
                 @PreviousItem.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPreviousItem;
+                @Crouch.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @Crouch.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -391,6 +416,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @PreviousItem.started += instance.OnPreviousItem;
                 @PreviousItem.performed += instance.OnPreviousItem;
                 @PreviousItem.canceled += instance.OnPreviousItem;
+                @Crouch.started += instance.OnCrouch;
+                @Crouch.performed += instance.OnCrouch;
+                @Crouch.canceled += instance.OnCrouch;
             }
         }
     }
@@ -438,6 +466,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         void OnUseItem(InputAction.CallbackContext context);
         void OnNextItem(InputAction.CallbackContext context);
         void OnPreviousItem(InputAction.CallbackContext context);
+        void OnCrouch(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
