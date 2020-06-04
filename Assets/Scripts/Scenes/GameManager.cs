@@ -24,8 +24,8 @@ namespace Ch.Luca.MyGame
         {
             if (Instance == null)
             {
-                Instance = this;
-                DontDestroyOnLoad(this.gameObject);
+                Instance = this.GetComponent<GameManager>() ;
+                //DontDestroyOnLoad(this.gameObject);
             }
             else
             {
@@ -83,6 +83,7 @@ namespace Ch.Luca.MyGame
             
         public void LeaveRoom()
         {
+            PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
             PhotonNetwork.LeaveRoom();
         }
 

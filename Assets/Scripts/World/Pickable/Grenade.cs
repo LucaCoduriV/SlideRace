@@ -85,8 +85,10 @@ public class Grenade : PickableItem, IThrowableItem
                 player.GetComponent<PlayerController>().RemoveLife(damage);
             }
         }
-
-        Destroy(gameObject);
+        
+        PhotonNetwork.Destroy(gameObject);
+        
+        
     }
 
     private float CalculateDamageFromDistance(Vector3 PointA, Vector3 PointB)

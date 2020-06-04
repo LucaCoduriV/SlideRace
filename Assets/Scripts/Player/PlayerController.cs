@@ -175,7 +175,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     }
 
 
-    public void OnEnable()
+    public override void OnEnable()
     {
         if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
@@ -184,9 +184,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         inputMaster.Enable();
     }
 
-    public void OnDisable()
+    public override void OnDisable()
     {
-
+        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        {
+            return;
+        }
         inputMaster.Disable();
     }
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Ch.Luca.MyGame;
 
 public class UserInterface : MonoBehaviourPunCallbacks
 {
@@ -127,9 +128,7 @@ public class UserInterface : MonoBehaviourPunCallbacks
 
     public void OnQuit()
     {
-        Debug.Log("Quit Game !");
-        //PhotonNetwork.DestroyPlayerObjects(PlayerController.LocalPlayerInstance.GetComponent<PhotonView>());
-        PhotonNetwork.LeaveRoom();
+        GameManager.Instance.LeaveRoom();
         
     }
 
