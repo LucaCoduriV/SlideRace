@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         inputMaster = new InputMaster();
         inputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
-        inputMaster.Player.UseItem.performed += ctx => { /*rien*/ };
+        inputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().TurnRagdollOn(); };
         inputMaster.Player.NextItem.performed += ctx =>
         {
             //changement d'arme
@@ -107,16 +107,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     // Update is called once per frame
     void Update()
     {
-
-        if(rightHandTransform != null)
-        {
-            //ShowSelectedItem();
-        }
-        else
-        {
-            Debug.LogError("Unable to pickup object without a hand");
-        }
-        
         
     }
     

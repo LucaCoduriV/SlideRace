@@ -14,8 +14,11 @@ public class PlayerNamePlate : MonoBehaviourPun
     private void Start()
     {
         cameraTransform = Camera.main.transform;
-
-        namePlateText.text = photonView.Owner.NickName;
+        if (PhotonNetwork.IsConnected)
+        {
+            namePlateText.text = photonView.Owner.NickName;
+        }
+        
 
         if (photonView.IsMine)
         {

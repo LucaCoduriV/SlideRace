@@ -51,9 +51,15 @@ public class CameraManager : MonoBehaviour
             {
                 cameraTransform.position = PlayerController.LocalPlayerInstance.transform.GetChild(0).transform.position;
 
+                if (!PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().IsDead && !PlayerController.LocalPlayerInstance.GetComponent<Ragdoll>().isRagdoll)
+                {
+                    RotateCamera();
+                }
+                
+
             }
 
-            RotateCamera();
+            
         }
     }
 

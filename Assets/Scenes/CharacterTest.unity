@@ -238,26 +238,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
-      propertyPath: gravity
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
-      propertyPath: maxVelocityChange
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
-      propertyPath: acceleration
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
-      propertyPath: speed
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 1843834688, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
-      propertyPath: jumpHeight
-      value: 1.5
-      objectReference: {fileID: 0}
     - target: {fileID: 1932595954, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
       propertyPath: viewIdField
       value: 1
@@ -267,21 +247,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Crypto
       objectReference: {fileID: 0}
-    - target: {fileID: 2619902981751206456, guid: 5a00b252a592c1a4db1c34ad8c51576d,
-        type: 3}
-      propertyPath: animatorDefault
-      value: 
-      objectReference: {fileID: 9100000, guid: 80c2458c3e4b7d8408d5b3c32753754c, type: 2}
-    - target: {fileID: 2619902981751206456, guid: 5a00b252a592c1a4db1c34ad8c51576d,
-        type: 3}
-      propertyPath: animatorKnife
-      value: 
-      objectReference: {fileID: 22100000, guid: ee8479ea3325ad443bd011bb970f6d02,
-        type: 2}
     - target: {fileID: 4413606226582996946, guid: 5a00b252a592c1a4db1c34ad8c51576d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 13.2874775
+      value: 14.242
       objectReference: {fileID: 0}
     - target: {fileID: 4413606226582996946, guid: 5a00b252a592c1a4db1c34ad8c51576d,
         type: 3}
@@ -291,7 +260,7 @@ PrefabInstance:
     - target: {fileID: 4413606226582996946, guid: 5a00b252a592c1a4db1c34ad8c51576d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.8
+      value: 5.77
       objectReference: {fileID: 0}
     - target: {fileID: 4413606226582996946, guid: 5a00b252a592c1a4db1c34ad8c51576d,
         type: 3}
@@ -338,12 +307,6 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 6037713821466503848, guid: 5a00b252a592c1a4db1c34ad8c51576d,
-        type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 22100000, guid: ee8479ea3325ad443bd011bb970f6d02,
-        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a00b252a592c1a4db1c34ad8c51576d, type: 3}
 --- !u!1 &859510995

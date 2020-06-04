@@ -53,9 +53,13 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         else{
             inputMaster = new InputMaster();
 
-            inputMaster.Player.Movement.performed += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-            inputMaster.Player.Movement.canceled += ctx => SetMovementSpeed(ctx.ReadValue<Vector2>());
-            inputMaster.Player.Jump.performed += ctx => doAJump = true;
+            inputMaster.Player.Movement.performed += ctx => { 
+                if(GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>()); 
+            };
+            inputMaster.Player.Movement.canceled += ctx => {
+                if(GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>()); 
+            };
+            inputMaster.Player.Jump.performed += ctx => { if (GetComponent<PlayerController>().IsDead == false) doAJump = true; };
             inputMaster.Player.Jump.canceled += ctx => doAJump = false;
         }
 
@@ -63,15 +67,14 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     }
 
     void Update()
-    {
+    {   
         //update Animation
         UpdateAnimationSpeed();
-
     }
 
     void FixedUpdate()
     {
-        if (true) //grounded
+        if (!GetComponent<Ragdoll>().isRagdoll)
         {
             
             // Calculate how fast we should be moving
