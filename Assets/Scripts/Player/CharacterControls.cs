@@ -34,6 +34,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     private float verticalAxe;
     private bool doAJump;
     private bool isCrouching;
+    private bool isTryingToStandUp = false;
     private Vector3 previousTargetSpeed = Vector3.zero;
     private Vector3 MaxVelocity = Vector3.zero;
     private Vector4 capsuleColliderDefault;
@@ -80,10 +81,11 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         //update Animation
         UpdateAnimationSpeed();
 
-        float rayDistance = capsuleColliderDefault.w / 2;
-        Vector3 rayStart = transform.TransformPoint(capsuleColliderDefault) + Vector3.up * (capsuleColliderDefault.w / 2 - rayDistance);
-
-        Debug.DrawRay(rayStart, Vector3.up * rayDistance);
+        if(isTryingToStandUp && CanStandUp())
+        {
+            isTryingToStandUp = false;
+            photonView.RPC("Crouch", RpcTarget.All, false);
+        }
         
     }
 
@@ -185,6 +187,10 @@ public class CharacterControls : MonoBehaviourPunCallbacks
                 //Déplacer la camera
                 transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y + 0.6f, transform.GetChild(0).transform.localPosition.z);
                 isCrouching = false;
+            }
+            else
+            {
+                isTryingToStandUp = true;
             }
         }
     }
