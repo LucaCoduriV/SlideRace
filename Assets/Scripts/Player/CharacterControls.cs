@@ -79,6 +79,12 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     {   
         //update Animation
         UpdateAnimationSpeed();
+
+        float rayDistance = capsuleColliderDefault.w / 2;
+        Vector3 rayStart = transform.TransformPoint(capsuleColliderDefault) + Vector3.up * (capsuleColliderDefault.w / 2 - rayDistance);
+
+        Debug.DrawRay(rayStart, Vector3.up * rayDistance);
+        
     }
 
     void FixedUpdate()
@@ -149,9 +155,9 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     [PunRPC]
     private void Crouch(bool status)
     {
-        isCrouching = status;
+        
 
-        if (status)
+        if (status && !isCrouching)
         {
             GetComponent<Animator>().SetBool("Crouch", true);
             
@@ -163,20 +169,38 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
             //Déplacer la camera
             transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y - 0.6f, transform.GetChild(0).transform.localPosition.z);
-
+            isCrouching = true;
 
         }
-        else
+        else if(!status && isCrouching)
         {
-            GetComponent<Animator>().SetBool("Crouch", false);
-            //déplacer le collider
-            GetComponent<CapsuleCollider>().center = capsuleColliderDefault;
-            GetComponent<CapsuleCollider>().height = capsuleColliderDefault.w;
+            
+            if (CanStandUp())
+            {
+                GetComponent<Animator>().SetBool("Crouch", false);
+                //déplacer le collider
+                GetComponent<CapsuleCollider>().center = capsuleColliderDefault;
+                GetComponent<CapsuleCollider>().height = capsuleColliderDefault.w;
 
-            //Déplacer la camera
-            transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y + 0.6f, transform.GetChild(0).transform.localPosition.z);
+                //Déplacer la camera
+                transform.GetChild(0).transform.localPosition = new Vector3(transform.GetChild(0).transform.localPosition.x, transform.GetChild(0).transform.localPosition.y + 0.6f, transform.GetChild(0).transform.localPosition.z);
+                isCrouching = false;
+            }
         }
     }
+
+    private bool CanStandUp()
+    {
+        float radius = GetComponent<CapsuleCollider>().radius;
+        float rayDistance = capsuleColliderDefault.w / 2;
+        Vector3 rayStart = transform.TransformPoint(capsuleColliderDefault) + Vector3.up * (capsuleColliderDefault.w / 2 - rayDistance);
+
+        //bool hit = Physics.BoxCast(rayStart, new Vector3(radius, rayDistance, radius), Vector3.up, Quaternion.Euler(0f,0f,0f), 0.1f);
+        bool hit = Physics.Raycast(rayStart, Vector3.up, rayDistance);
+
+        return !hit;
+    }
+
     private void UpdateAnimationSpeed()
     {
         float yVel = Vector3.Dot(GetComponent<Rigidbody>().velocity, transform.forward);
