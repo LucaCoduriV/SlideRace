@@ -7,6 +7,7 @@ public class HUDController : MonoBehaviour
 {
     public Text textHP;
     public Text deadMessage;
+    
 
     private static HUDController instance;
     
@@ -86,4 +87,8 @@ public class HUDController : MonoBehaviour
             deadMessage.gameObject.SetActive(false);
         }
     }
+
+    
+
+
 }
