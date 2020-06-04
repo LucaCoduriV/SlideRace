@@ -5,7 +5,6 @@ using UnityEngine;
 public class CameraManager : MonoBehaviour
 {
     public bool isFollowingLocalPlayer = false;
-    public float mouseSensitivity = 100f;
     public InputMaster inputMaster;
     public GameObject mainCamera;
     
@@ -31,6 +30,7 @@ public class CameraManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
     }
 
     // Update is called once per frame
@@ -75,8 +75,8 @@ public class CameraManager : MonoBehaviour
 
     public void RotateCamera()
     {
-        float mouseX = this.mouseX * mouseSensitivity * Time.deltaTime;
-        float mouseY = this.mouseY * mouseSensitivity * Time.deltaTime;
+        float mouseX = this.mouseX * ConfigManager.config.MouseSensitivity * Time.deltaTime;
+        float mouseY = this.mouseY * ConfigManager.config.MouseSensitivity * Time.deltaTime;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);

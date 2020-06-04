@@ -1,20 +1,22 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UserInterface : MonoBehaviour
+public class UserInterface : MonoBehaviourPunCallbacks
 {
     public InputMaster inputMaster;
     
 
     
 
-    [Header("Pause Manel")]
+    [Header("Pause Panel")]
     public GameObject PausePanel;
     private bool IsPauseOpen = false;
 
-    [Header("Options Manel")]
+    [Header("Options Panel")]
     public GameObject OptionsPanel;
+    public TMPro.TMP_InputField sensitivityInput;
     private bool IsOptionsOpen = false;
 
 
@@ -67,6 +69,10 @@ public class UserInterface : MonoBehaviour
 
     public void ShowPanel(string panelName)
     {
+        if (OptionsPanel.name.Contains(panelName))
+        {
+            updateOptionsFields();
+        }
         OptionsPanel.SetActive(OptionsPanel.name.Contains(panelName));
 
         TogglePauseMenu(false);
@@ -94,11 +100,30 @@ public class UserInterface : MonoBehaviour
         
     }
 
+    public void updateOptionsFields()
+    {
+        sensitivityInput.text = ConfigManager.config.MouseSensitivity.ToString();
+    }
+
+    public void applyOptionsModifications()
+    {
+        ConfigManager.config.MouseSensitivity = float.Parse(sensitivityInput.text);
+
+        ConfigManager.SaveIntoJson();
+    }
+
     public void OnQuit()
     {
         Debug.Log("Quit Game !");
+        //PhotonNetwork.DestroyPlayerObjects(PlayerController.LocalPlayerInstance.GetComponent<PhotonView>());
+        PhotonNetwork.LeaveRoom();
+        
     }
 
+    public override void OnLeftRoom()
+    {
+        PhotonNetwork.LoadLevel(0);
+    }
 
     public void OnEnable()
     {
