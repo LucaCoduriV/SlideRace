@@ -155,7 +155,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public void Kill()
     {
         this.health = 0;
-        this.isDead = true;
+        IsAlive();
 
         if (HUDController.GetPlayerToShowHUD() == this)
         {
@@ -170,6 +170,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         {
             //cacher le couteau
             isDead = true;
+
+            if(GetComponent<Ragdoll>() != null)
+            {
+                GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.AllBuffered);
+            }
         }
         else isDead = false;
     }

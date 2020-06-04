@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ragdoll : MonoBehaviour
+public class Ragdoll : MonoBehaviourPun
 {
     public List<Collider> bodyParts;
 
@@ -30,6 +31,7 @@ public class Ragdoll : MonoBehaviour
         }
     }
 
+    [PunRPC]
     public void TurnRagdollOn()
     {
         GetComponent<Animator>().enabled = false;

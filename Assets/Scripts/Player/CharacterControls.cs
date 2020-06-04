@@ -65,12 +65,11 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             };
             inputMaster.Player.Jump.performed += ctx => { if (GetComponent<PlayerController>().IsDead == false) doAJump = true; };
             inputMaster.Player.Jump.canceled += ctx => doAJump = false;
-            inputMaster.Player.Crouch.performed += ctx => { Crouch(true); };
-            inputMaster.Player.Crouch.canceled += ctx => { Crouch(false); };
+            inputMaster.Player.Crouch.performed += ctx => { photonView.RPC("Crouch", RpcTarget.All, true); };
+            inputMaster.Player.Crouch.canceled += ctx => { photonView.RPC("Crouch", RpcTarget.All, false); };
         }
 
-        capsuleColliderDefault = GetComponent<CapsuleCollider>().center;
-        capsuleColliderDefault.w = GetComponent<CapsuleCollider>().height;
+        
         
 
 
@@ -147,6 +146,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         grounded = true;
     }
 
+    [PunRPC]
     private void Crouch(bool status)
     {
         isCrouching = status;
@@ -154,7 +154,10 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         if (status)
         {
             GetComponent<Animator>().SetBool("Crouch", true);
+            
             //déplacer le collider
+            capsuleColliderDefault = GetComponent<CapsuleCollider>().center;
+            capsuleColliderDefault.w = GetComponent<CapsuleCollider>().height;
             GetComponent<CapsuleCollider>().center = new Vector3(GetComponent<CapsuleCollider>().center.x, 0.64f, GetComponent<CapsuleCollider>().center.z);
             GetComponent<CapsuleCollider>().height = 1.3f;
 
