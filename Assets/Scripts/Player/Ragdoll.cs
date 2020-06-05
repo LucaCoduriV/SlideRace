@@ -23,8 +23,10 @@ public class Ragdoll : MonoBehaviourPun
             {
                 Physics.IgnoreCollision(collider, GetComponent<Collider>());
 
+                collider.attachedRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
                 collider.attachedRigidbody.isKinematic = true;
                 collider.isTrigger = true;
+                collider.enabled = false;
                 bodyParts.Add(collider);
             }
             
@@ -44,12 +46,14 @@ public class Ragdoll : MonoBehaviourPun
 
         foreach (Collider collider in bodyParts)
         {
-            
 
+            collider.enabled = true;
+            collider.attachedRigidbody.collisionDetectionMode = CollisionDetectionMode.Discrete;
             collider.attachedRigidbody.isKinematic = false;
             collider.isTrigger = false;
             collider.attachedRigidbody.velocity = GetComponent<Rigidbody>().velocity;
             collider.material.staticFriction = 0;
+            
         }
 
         isRagdoll = true;

@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
+using ExitGames.Client.Photon;
+using System.Collections.Generic;
 
 namespace Ch.Luca.MyGame
 {
@@ -12,9 +13,11 @@ namespace Ch.Luca.MyGame
         #region Public Fields
 
         public static GameManager Instance;
-
-        [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
+
+        public bool hasGameStarted = false;
+        public List<Transform> spawnList;
+        public int previousSpawn = -1;
 
         #endregion
 
@@ -24,8 +27,7 @@ namespace Ch.Luca.MyGame
         {
             if (Instance == null)
             {
-                Instance = this.GetComponent<GameManager>() ;
-                //DontDestroyOnLoad(this.gameObject);
+                Instance = this.GetComponent<GameManager>();
             }
             else
             {
@@ -35,36 +37,8 @@ namespace Ch.Luca.MyGame
 
         void Start()
         {
-            
-            
-
-            if (playerPrefab == null)
-            {
-                Debug.LogError("<Color=Red><a>Missing</a></Color> playerPrefab Reference. Please set it up in GameObject 'Game Manager'", this);
-            }
-            else
-            {
-                if (PlayerController.LocalPlayerInstance == null)
-                {
-                    Debug.LogFormat("We are Instantiating LocalPlayer from {0}", SceneManagerHelper.ActiveSceneName);
-
-                    //Trouver un spawn disponible
-                    Vector3 spawn = SpawnManager.instance.spawns.Peek().position;
-                    
-
-
-                    // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                    PhotonNetwork.Instantiate(this.playerPrefab.name, spawn, Quaternion.identity, 0);
-                    GetComponent<CameraManager>().FollowLocalPlayer();
-                }
-                else
-                {
-
-                    Debug.LogFormat("Ignoring scene load for {0}", SceneManagerHelper.ActiveSceneName);
-                }
-            }
-            
-
+            Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_READY, true } };
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
 
         #endregion
@@ -87,34 +61,68 @@ namespace Ch.Luca.MyGame
             PhotonNetwork.LeaveRoom();
         }
 
+        public override void OnPlayerEnteredRoom(Player other)
+        {
+            //BeforeStart();
+        }
+
+        public override void OnJoinedRoom()
+        {
+            //BeforeStart();
+        }
+
+        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+        {
+            BeforeStart();
+        }
+
         #endregion
 
         #region Private Methods
-        void LoadArena()
+
+        private void BeforeStart()
         {
-            if (!PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && !hasGameStarted)
             {
-                Debug.LogError("PhotonNetwork : Trying to load a level but we are not the master client");
+                //vérifier que tous les joueurs ont chargé
+                if (CheckAllPlayerReady())
+                {
+                    //informer que les joueurs peuvent spawn
+                    hasGameStarted = true;
+                    photonView.RPC("Spawn", RpcTarget.Others);
+                    PhotonNetwork.Instantiate("Crypto", SpawnController.localInstance.mySpawnPoint.position, SpawnController.localInstance.mySpawnPoint.rotation);
+                    GetComponent<CameraManager>().FollowLocalPlayer();
+                }
 
-            }
-            Debug.LogFormat("PhotonNetwork : Loading level : {0}", PhotonNetwork.CurrentRoom.PlayerCount);
-            PhotonNetwork.LoadLevel("Multiplayer test");
-        }
-        #endregion
-
-        #region Photo Callbacks
-        public override void OnPlayerEnteredRoom(Player other)
-        {
-            Debug.LogFormat("OnPlayerEnteredRoom() : {0}", other.NickName);
-
-            if (PhotonNetwork.IsMasterClient)
-            {
-                Debug.LogFormat("OnPlayerEnteredRoom() IsMasterClient {0}", PhotonNetwork.IsMasterClient);
-
-                //LoadArena();
             }
         }
 
+        private bool CheckAllPlayerReady()
+        {
+            Player[] players = PhotonNetwork.PlayerList;
+
+            foreach (var player in players)
+            {
+                object ready;
+                if(player.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_READY, out ready))
+                {
+                    if (!(bool)ready)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        
+
+        [PunRPC]
+        public void Spawn()
+        {
+            PhotonNetwork.Instantiate("SpawnManager", Vector3.zero, Quaternion.identity);
+            
+        }
         #endregion
     }
 }

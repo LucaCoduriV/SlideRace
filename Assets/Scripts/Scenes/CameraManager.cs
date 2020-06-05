@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CameraManager : MonoBehaviour
 {
@@ -12,15 +13,15 @@ public class CameraManager : MonoBehaviour
     float xRotation = 0.0f;
     float mouseX = 0.0f;
     float mouseY = 0.0f;
+
+    Vector2 _lookValue = Vector2.zero;
+    Vector3 _rotation = Vector3.zero;
     private Transform cameraTransform;
 
     void Awake()
     {
         inputMaster = new InputMaster();
-        inputMaster.Player.LookX.performed += ctx => mouseX = ctx.ReadValue<float>();
-        inputMaster.Player.LookX.canceled += ctx => mouseX = ctx.ReadValue<float>();
-        inputMaster.Player.LookY.performed += ctx => mouseY = ctx.ReadValue<float>();
-        inputMaster.Player.LookY.canceled += ctx => mouseY = ctx.ReadValue<float>();
+        
     }
 
     // Start is called before the first frame update
@@ -54,6 +55,8 @@ public class CameraManager : MonoBehaviour
                 if (!PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().IsDead && !PlayerController.LocalPlayerInstance.GetComponent<Ragdoll>().isRagdoll && UserInterface.instance.followMouse)
                 {
                     RotateCamera();
+
+                    
                 }
                 
 
@@ -75,23 +78,29 @@ public class CameraManager : MonoBehaviour
 
     public void RotateCamera()
     {
-        float mouseX = this.mouseX * ConfigManager.config.MouseSensitivity * Time.deltaTime;
-        float mouseY = this.mouseY * ConfigManager.config.MouseSensitivity * Time.deltaTime;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        _lookValue = inputMaster.Player.MouseAim.ReadValue<Vector2>();
 
+        _rotation.x += -_lookValue.y * ConfigManager.config.MouseSensitivity * Time.deltaTime;
+        _rotation.y += _lookValue.x * ConfigManager.config.MouseSensitivity * Time.deltaTime;
 
-        cameraTransform.transform.rotation = Quaternion.Euler(xRotation, PlayerController.LocalPlayerInstance.transform.rotation.eulerAngles.y, PlayerController.LocalPlayerInstance.transform.rotation.eulerAngles.z);
+        cameraTransform.transform.rotation = Quaternion.Euler(_rotation);
 
-        PlayerController.LocalPlayerInstance.transform.Rotate(Vector3.up * mouseX);
+        Vector3 playerTransformRotation = PlayerController.LocalPlayerInstance.transform.eulerAngles;
 
+        PlayerController.LocalPlayerInstance.transform.eulerAngles = new Vector3(playerTransformRotation.x, cameraTransform.transform.rotation.eulerAngles.y, playerTransformRotation.z);
+    }
 
+    private void OnMoveInput(InputAction.CallbackContext context)
+    {
+        _lookValue = context.ReadValue<Vector2>();
     }
 
     public void OnEnable()
     {
         inputMaster.Enable();
+
+        //inputMaster.Player.MouseAim.performed += OnMoveInput;
     }
 
     public void OnDisable()

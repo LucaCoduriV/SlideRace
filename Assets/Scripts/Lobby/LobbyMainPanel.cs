@@ -26,6 +26,13 @@ public class LobbyMainPanel : MonoBehaviourPunCallbacks
     public InputField RoomNameInputField;
     public InputField MaxPlayersInputField;
 
+    [Header("Inside Room Panel")]
+    public GameObject InsideRoomPanel;
+    public GameObject PlayerListContent;
+
+    public Button StartGameButton;
+    public GameObject PlayerListEntryPrefab;
+
 
     //private
 
@@ -97,49 +104,49 @@ public class LobbyMainPanel : MonoBehaviourPunCallbacks
 
         Debug.LogWarning("ROOM CREATED !");
     }
-
+    //----------------------------------------------------------------------------------------------------------------------------------------
     public override void OnJoinedRoom()
     {
-        //SetActivePanel(InsideRoomPanel.name);
+        SetActivePanel(InsideRoomPanel.name);
 
-        //if (playerListEntries == null)
-        //{
-        //    playerListEntries = new Dictionary<int, GameObject>();
-        //}
-
-        //foreach (Player p in PhotonNetwork.PlayerList)
-        //{
-        //    GameObject entry = Instantiate(PlayerListEntryPrefab);
-        //    entry.transform.SetParent(InsideRoomPanel.transform);
-        //    entry.transform.localScale = Vector3.one;
-        //    entry.GetComponent<PlayerListEntry>().Initialize(p.ActorNumber, p.NickName);
-
-        //    object isPlayerReady;
-        //    if (p.CustomProperties.TryGetValue(AsteroidsGame.PLAYER_READY, out isPlayerReady))
-        //    {
-        //        entry.GetComponent<PlayerListEntry>().SetPlayerReady((bool)isPlayerReady);
-        //    }
-
-        //    playerListEntries.Add(p.ActorNumber, entry);
-        //}
-
-        //StartGameButton.gameObject.SetActive(CheckPlayersReady());
-
-        //Hashtable props = new Hashtable
-        //    {
-        //        {AsteroidsGame.PLAYER_LOADED_LEVEL, false}
-        //    };
-        //PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-
-        //temporaire
-        Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
-
-        // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        if (playerListEntries == null)
         {
-            //load the room
-            PhotonNetwork.LoadLevel("Multiplayer test");
+            playerListEntries = new Dictionary<int, GameObject>();
         }
+
+        foreach (Player p in PhotonNetwork.PlayerList)
+        {
+            GameObject entry = Instantiate(PlayerListEntryPrefab);
+            entry.transform.SetParent(PlayerListContent.transform);
+            //entry.transform.localScale = Vector3.one;
+            entry.GetComponent<PlayerListEntry>().Initialize(p.ActorNumber, p.NickName); //<------------------------------
+
+            object isPlayerReady;
+            if (p.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_READY, out isPlayerReady))
+            {
+                entry.GetComponent<PlayerListEntry>().SetPlayerReady((bool)isPlayerReady);
+            }
+
+            playerListEntries.Add(p.ActorNumber, entry);
+        }
+
+        StartGameButton.gameObject.SetActive(CheckPlayersReady());
+
+        Hashtable props = new Hashtable
+            {
+                {SlideRaceGame.PLAYER_LOADED_LEVEL, false}
+            };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+
+        ////temporaire
+        //Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
+
+        //// #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
+        //if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        //{
+        //    //load the room
+        //    PhotonNetwork.LoadLevel("Multiplayer test");
+        //}
     }
 
     public override void OnLeftRoom()
@@ -154,58 +161,63 @@ public class LobbyMainPanel : MonoBehaviourPunCallbacks
         playerListEntries.Clear();
         playerListEntries = null;
     }
-
+    //----------------------------------------------------------------------------------------------------------------------------------------
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        //GameObject entry = Instantiate(PlayerListEntryPrefab);
-        //entry.transform.SetParent(InsideRoomPanel.transform);
+        GameObject entry = Instantiate(PlayerListEntryPrefab);
+        entry.transform.SetParent(PlayerListContent.transform);
         //entry.transform.localScale = Vector3.one;
-        //entry.GetComponent<PlayerListEntry>().Initialize(newPlayer.ActorNumber, newPlayer.NickName);
+        entry.GetComponent<PlayerListEntry>().Initialize(newPlayer.ActorNumber, newPlayer.NickName);
 
-        //playerListEntries.Add(newPlayer.ActorNumber, entry);
+        playerListEntries.Add(newPlayer.ActorNumber, entry);
 
-        //StartGameButton.gameObject.SetActive(CheckPlayersReady());
+        StartGameButton.gameObject.SetActive(CheckPlayersReady());
     }
-
+    //----------------------------------------------------------------------------------------------------------------------------------------
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        //Destroy(playerListEntries[otherPlayer.ActorNumber].gameObject);
-        //playerListEntries.Remove(otherPlayer.ActorNumber);
+        Destroy(playerListEntries[otherPlayer.ActorNumber].gameObject);
+        playerListEntries.Remove(otherPlayer.ActorNumber);
 
-        //StartGameButton.gameObject.SetActive(CheckPlayersReady());
+        StartGameButton.gameObject.SetActive(CheckPlayersReady());
     }
-
+    //----------------------------------------------------------------------------------------------------------------------------------------
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        //if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterClient.ActorNumber)
-        //{
-        //    StartGameButton.gameObject.SetActive(CheckPlayersReady());
-        //}
+        if (PhotonNetwork.LocalPlayer.ActorNumber == newMasterClient.ActorNumber)
+        {
+            StartGameButton.gameObject.SetActive(CheckPlayersReady());
+        }
     }
-
+    //----------------------------------------------------------------------------------------------------------------------------------------
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        //if (playerListEntries == null)
-        //{
-        //    playerListEntries = new Dictionary<int, GameObject>();
-        //}
+        if (playerListEntries == null)
+        {
+            playerListEntries = new Dictionary<int, GameObject>();
+        }
 
-        //GameObject entry;
-        //if (playerListEntries.TryGetValue(targetPlayer.ActorNumber, out entry))
-        //{
-        //    object isPlayerReady;
-        //    if (changedProps.TryGetValue(AsteroidsGame.PLAYER_READY, out isPlayerReady))
-        //    {
-        //        entry.GetComponent<PlayerListEntry>().SetPlayerReady((bool)isPlayerReady);
-        //    }
-        //}
+        GameObject entry;
+        if (playerListEntries.TryGetValue(targetPlayer.ActorNumber, out entry))
+        {
+            object isPlayerReady;
+            if (changedProps.TryGetValue(SlideRaceGame.PLAYER_READY, out isPlayerReady))
+            {
+                entry.GetComponent<PlayerListEntry>().SetPlayerReady((bool)isPlayerReady);
+            }
+        }
 
-        //StartGameButton.gameObject.SetActive(CheckPlayersReady());
+        StartGameButton.gameObject.SetActive(CheckPlayersReady());
     }
 
     #endregion
 
     #region UI callbacks
+
+    public void OnLeaveGameButtonClicked()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
     public void OnLoginButtonClicked()
     {
         string playerName = PlayerNameInput.text;
@@ -262,13 +274,55 @@ public class LobbyMainPanel : MonoBehaviourPunCallbacks
         PhotonNetwork.CreateRoom(roomName, options, null);
     }
 
+    public void OnStartGameButtonClicked()
+    {
+        PhotonNetwork.CurrentRoom.IsOpen = false;
+        PhotonNetwork.CurrentRoom.IsVisible = false;
+
+        //PhotonNetwork.LoadLevel("Multiplayer test");
+        PhotonNetwork.LoadLevel("Multiplayer test");
+    }
+
     #endregion
+
+    public void LocalPlayerPropertiesUpdated()
+    {
+        StartGameButton.gameObject.SetActive(CheckPlayersReady());
+    }
 
     public void SetActivePanel(string activePanel)
     {
         LoginPanel.SetActive(activePanel.Equals(LoginPanel.name));
         RoomListPanel.SetActive(activePanel.Equals(RoomListPanel.name));    // UI should call OnRoomListButtonClicked() to activate this
         CreateRoomPanel.SetActive(activePanel.Equals(CreateRoomPanel.name));
+        InsideRoomPanel.SetActive(activePanel.Equals(InsideRoomPanel.name));
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------
+    private bool CheckPlayersReady()
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return false;
+        }
+
+        foreach (Player p in PhotonNetwork.PlayerList)
+        {
+            object isPlayerReady;
+            if (p.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_READY, out isPlayerReady))
+            {
+                if (!(bool)isPlayerReady)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void ClearRoomListView()

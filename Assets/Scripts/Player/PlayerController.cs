@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             else
             {
                 PlayerController.LocalPlayerInstance = this.gameObject;
-
+                this.gameObject.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
                 //set LocalPlayer layer to all GameObject
                 SetLayerRecursively(this.gameObject, 9);
 

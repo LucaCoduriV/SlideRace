@@ -89,6 +89,14 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""MouseAim"",
+                    ""type"": ""Value"",
+                    ""id"": ""768d4fad-41d2-4c65-9bb7-47a1f9350eff"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -234,6 +242,17 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a8589602-5e52-4cb3-bbf8-d168ce5649b5"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -278,6 +297,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         m_Player_NextItem = m_Player.FindAction("NextItem", throwIfNotFound: true);
         m_Player_PreviousItem = m_Player.FindAction("PreviousItem", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_MouseAim = m_Player.FindAction("MouseAim", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -339,6 +359,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_NextItem;
     private readonly InputAction m_Player_PreviousItem;
     private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_MouseAim;
     public struct PlayerActions
     {
         private @InputMaster m_Wrapper;
@@ -352,6 +373,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         public InputAction @NextItem => m_Wrapper.m_Player_NextItem;
         public InputAction @PreviousItem => m_Wrapper.m_Player_PreviousItem;
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        public InputAction @MouseAim => m_Wrapper.m_Player_MouseAim;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -388,6 +410,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @Crouch.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
                 @Crouch.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
                 @Crouch.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnCrouch;
+                @MouseAim.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseAim;
+                @MouseAim.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseAim;
+                @MouseAim.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseAim;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -419,6 +444,9 @@ public class @InputMaster : IInputActionCollection, IDisposable
                 @Crouch.started += instance.OnCrouch;
                 @Crouch.performed += instance.OnCrouch;
                 @Crouch.canceled += instance.OnCrouch;
+                @MouseAim.started += instance.OnMouseAim;
+                @MouseAim.performed += instance.OnMouseAim;
+                @MouseAim.canceled += instance.OnMouseAim;
             }
         }
     }
@@ -467,6 +495,7 @@ public class @InputMaster : IInputActionCollection, IDisposable
         void OnNextItem(InputAction.CallbackContext context);
         void OnPreviousItem(InputAction.CallbackContext context);
         void OnCrouch(InputAction.CallbackContext context);
+        void OnMouseAim(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
