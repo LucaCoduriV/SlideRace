@@ -31,7 +31,8 @@ public class Boost : MonoBehaviour
 
         if(other.tag == "Player")
         //body.AddForce(rotRight * rotUp * Vector3.forward * (speed));
-        body.AddForce(rotRight * rotUp * Vector3.forward * (speed), ForceMode.VelocityChange);
+        body.AddForce(rotRight * rotUp * Vector3.forward * (speed), ForceMode.Force);
+        //body.velocity += rotRight * rotUp * Vector3.forward * (speed/10);
 
 
     }
