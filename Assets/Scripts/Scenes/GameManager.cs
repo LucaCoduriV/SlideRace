@@ -19,6 +19,10 @@ namespace Ch.Luca.MyGame
         public List<Transform> spawnList;
         public int previousSpawn = -1;
 
+        public double gameStartTime;
+        public double remainingTime = 0;
+        public double roundTime = 300;
+
         #endregion
 
         #region MonoBehaviour Methods
@@ -39,6 +43,15 @@ namespace Ch.Luca.MyGame
         {
             Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_READY, true } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        }
+
+        void Update()
+        {
+            if (hasGameStarted)
+            {
+                UpdateTimer();
+            }
+            
         }
 
         #endregion
@@ -76,9 +89,27 @@ namespace Ch.Luca.MyGame
             BeforeStart();
         }
 
+        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+        {
+            object propsTime;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_START_TIME, out propsTime))
+            {
+                gameStartTime = (double)propsTime;
+            }
+        }
+
+        
+
         #endregion
 
         #region Private Methods
+
+        private void UpdateTimer()
+        {
+            double incTimer = PhotonNetwork.Time - gameStartTime;
+
+            remainingTime = roundTime - Mathf.Round((float)incTimer);
+        }
 
         private void BeforeStart()
         {
@@ -90,6 +121,12 @@ namespace Ch.Luca.MyGame
                     //informer que les joueurs peuvent spawn
                     hasGameStarted = true;
                     photonView.RPC("Spawn", RpcTarget.All);
+
+                    //Démarrer le timer
+                    Hashtable props = new Hashtable();
+                    props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
+
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(props);
                     
                 }
 

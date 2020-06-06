@@ -2,17 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Ch.Luca.MyGame;
 
 public class HUDController : MonoBehaviour
 {
     public Text textHP;
     public Text deadMessage;
+    public Text timeText;
     
 
     private static HUDController instance;
     
     
     private static PlayerController playerToShowHUD;
+    
 
 
     
@@ -52,8 +55,8 @@ public class HUDController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-        
+        UpdateTimer();
+
     }
 
     public static void UpdateHUD()
@@ -87,6 +90,10 @@ public class HUDController : MonoBehaviour
         {
             deadMessage.gameObject.SetActive(false);
         }
+    }
+    private void UpdateTimer()
+    {
+        timeText.text = GameManager.Instance.remainingTime.ToString();
     }
 
     
