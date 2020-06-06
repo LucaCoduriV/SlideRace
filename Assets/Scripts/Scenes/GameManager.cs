@@ -89,12 +89,12 @@ namespace Ch.Luca.MyGame
                 {
                     //informer que les joueurs peuvent spawn
                     hasGameStarted = true;
-                    photonView.RPC("Spawn", RpcTarget.Others);
-                    PhotonNetwork.Instantiate("Crypto", SpawnController.localInstance.mySpawnPoint.position, SpawnController.localInstance.mySpawnPoint.rotation);
-                    GetComponent<CameraManager>().FollowLocalPlayer();
+                    photonView.RPC("Spawn", RpcTarget.All);
+                    
                 }
 
             }
+            
         }
 
         private bool CheckAllPlayerReady()

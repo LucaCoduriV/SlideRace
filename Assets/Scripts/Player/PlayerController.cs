@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
         inputMaster = new InputMaster();
         inputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
-        inputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().TurnRagdollOn(); };
+        inputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.All); };
         inputMaster.Player.NextItem.performed += ctx =>
         {
             //changement d'arme

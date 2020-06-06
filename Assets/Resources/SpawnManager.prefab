@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mySpawnPoint: {fileID: 0}
-  spawnList: []
 --- !u!114 &1193742826850761444
 MonoBehaviour:
   m_ObjectHideFlags: 0

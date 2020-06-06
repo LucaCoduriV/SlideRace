@@ -22,11 +22,16 @@ public class Inventory : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        leftHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().leftHandTransform;
-        rightHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().rightHandTransform;
-        headTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform;
+        if (photonView.IsMine)
+        {
+            leftHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().leftHandTransform;
+            rightHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().rightHandTransform;
+            headTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform;
+        }
+        
 
         mainCamera = Camera.main.transform;
+
         animator = GetComponent<Animator>();
 
         inventory_remade = new List<int>();

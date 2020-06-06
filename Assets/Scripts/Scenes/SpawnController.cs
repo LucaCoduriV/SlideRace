@@ -39,7 +39,13 @@ public class SpawnController : MonoBehaviourPun
     void SendSpawn(int spawnNumber)
     {
         mySpawnPoint = GameManager.Instance.spawnList[spawnNumber];
+        if (photonView.IsMine)
+        {
+            PhotonNetwork.Instantiate("Crypto", SpawnController.localInstance.mySpawnPoint.position, SpawnController.localInstance.mySpawnPoint.rotation);
+            GameManager.Instance.GetComponent<CameraManager>().FollowLocalPlayer();
+        }
         
+
     }
 
     public static int GetNextSpawn()
