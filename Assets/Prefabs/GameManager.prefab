@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 137470907600475150}
   - component: {fileID: 137470907600475149}
   - component: {fileID: 137470907600475151}
+  - component: {fileID: 137470906862263686}
   m_Layer: 0
-  m_Name: GameManager 1
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74,7 +75,20 @@ MonoBehaviour:
   spawnList:
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   previousSpawn: -1
+  gameStartTime: 0
+  remainingTime: 0
+  roundTime: 300
 --- !u!114 &137470907600475149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88,6 +102,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isFollowingLocalPlayer: 0
+  freeCamMode: 0
+  isFollowingPlayer: -1
   mainCamera: {fileID: 0}
 --- !u!114 &137470907600475151
 MonoBehaviour:
@@ -101,3 +117,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f690238c9ebe046810e1488d1c7eea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &137470906862263686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137470907600475139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3b268ebf822e8e45a4c1d93d278dded, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxVelocityChange: 2
+  acceleration: 1
+  speed: 0.1
+  freeCam: 0

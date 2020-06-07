@@ -18,7 +18,7 @@ public class DeadlyObject : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if(other.transform.tag == "Player")
+        if(other.transform.tag == "Player" && !other.gameObject.GetComponent<PlayerController>().IsDead)
         {
             other.transform.GetComponent<PlayerController>().Kill();
         }
@@ -27,7 +27,7 @@ public class DeadlyObject : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.transform.tag == "Player")
+        if (other.transform.tag == "Player" && !other.gameObject.GetComponent<PlayerController>().IsDead)
         {
             other.transform.GetComponent<PlayerController>().Kill();
         }

@@ -53,6 +53,8 @@ MonoBehaviour:
   - AskSpawn
   - SendSpawn
   - GetNextSpawn
+  - RPC_Update_Alive
+  - RPC_KillPlayer
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

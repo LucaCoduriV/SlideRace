@@ -1,8 +1,10 @@
 ﻿using Photon.Pun;
-using System.Collections;
+using Photon.Realtime;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using ExitGames.Client.Photon;
 
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -11,6 +13,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
     public static GameObject LocalPlayerInstance;
+    public event Action<int> OnPlayerDeath = delegate { Debug.Log("Nothing assigned to OnPlayerDeath"); };
 
     #endregion
 
@@ -100,6 +103,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         if (LocalPlayerInstance == this.gameObject)
         {
             HUDController.SetPlayerToShowHUD(this);
+
+            //indiquer que le joueur est en vie
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.PLAYER_IS_ALIVE, true);
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
         }
         
     }
@@ -168,13 +177,19 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (health <= 0)
         {
-            //cacher le couteau
             isDead = true;
 
             if(GetComponent<Ragdoll>() != null)
             {
                 GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.AllBuffered);
+
             }
+            if (photonView.IsMine)
+            {
+                photonView.RPC("RPC_KillPlayer", RpcTarget.OthersBuffered);
+            }
+            
+            OnPlayerDeath(photonView.OwnerActorNr); //executer l'évenement
         }
         else isDead = false;
     }
@@ -210,6 +225,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             // Network player, receive data
             this.health = (float)stream.ReceiveNext();
         }
+    }
+
+    [PunRPC]
+    public void RPC_KillPlayer()
+    {
+        this.health = 0;
+        IsAlive();
     }
 
     private void SetLayerRecursively(GameObject obj, int newLayer)

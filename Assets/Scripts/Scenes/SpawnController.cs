@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Ch.Luca.MyGame;
+using System;
 
 public class SpawnController : MonoBehaviourPun
 {
     public static SpawnController localInstance;
 
     public Transform mySpawnPoint;
+    public static event Action OnSpawn = delegate { Debug.Log("Spawning..."); };
 
     
 
@@ -42,7 +44,7 @@ public class SpawnController : MonoBehaviourPun
         if (photonView.IsMine)
         {
             PhotonNetwork.Instantiate("Crypto", SpawnController.localInstance.mySpawnPoint.position, SpawnController.localInstance.mySpawnPoint.rotation);
-            GameManager.Instance.GetComponent<CameraManager>().FollowLocalPlayer();
+            OnSpawn();
         }
         
 

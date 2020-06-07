@@ -282,6 +282,194 @@ public class @InputMaster : IInputActionCollection, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Spectator"",
+            ""id"": ""ca12b61e-0657-44a0-85e1-91433a3fef54"",
+            ""actions"": [
+                {
+                    ""name"": ""MouseAim"",
+                    ""type"": ""Value"",
+                    ""id"": ""b61508f5-bdd7-443e-9a8b-1def05635faa"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Movement"",
+                    ""type"": ""Button"",
+                    ""id"": ""279eab30-08d0-40d2-9d85-0e8e5868a038"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""MovementVertical"",
+                    ""type"": ""Button"",
+                    ""id"": ""65a4b2cb-e046-4af4-9e03-863fedb0416e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""NextPlayer"",
+                    ""type"": ""Button"",
+                    ""id"": ""85a39969-c8c7-45d5-b545-17dce4c72365"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""PreviousPlayer"",
+                    ""type"": ""Button"",
+                    ""id"": ""db2d3124-0c48-4884-b0ec-a50de156298c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""FreeLook"",
+                    ""type"": ""Button"",
+                    ""id"": ""32f0c517-e98a-4b24-90ed-2e3a60103bbd"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""f00c0fc4-1b74-4e74-a948-da6de46e4695"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseAim"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""258ea997-5ff0-443d-8365-0f33ff161863"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""175fac00-64d2-4f42-b69a-5209b5180510"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""5b7c296c-badb-458d-bf68-408a6e68cc5a"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""ce47aa40-2285-4f7b-b326-c50e14cf78eb"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""0c21edc5-9d08-4814-8104-d3f7b9b852d1"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""cf9b669d-3afe-4f1d-b981-ab1864cb497e"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MovementVertical"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""dac5b73c-09ee-403c-b1a9-24be55fa400c"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MovementVertical"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""33fb7b1e-9902-4e05-aefa-6b33e7d109bf"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MovementVertical"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cb0e168b-5020-47f2-927c-e837f132947d"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NextPlayer"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e71ff9cd-c8e5-42ec-b45b-26bd5113ad88"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PreviousPlayer"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ae814b90-a436-4e04-aa59-9a17eae518c3"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FreeLook"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -301,6 +489,14 @@ public class @InputMaster : IInputActionCollection, IDisposable
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
+        // Spectator
+        m_Spectator = asset.FindActionMap("Spectator", throwIfNotFound: true);
+        m_Spectator_MouseAim = m_Spectator.FindAction("MouseAim", throwIfNotFound: true);
+        m_Spectator_Movement = m_Spectator.FindAction("Movement", throwIfNotFound: true);
+        m_Spectator_MovementVertical = m_Spectator.FindAction("MovementVertical", throwIfNotFound: true);
+        m_Spectator_NextPlayer = m_Spectator.FindAction("NextPlayer", throwIfNotFound: true);
+        m_Spectator_PreviousPlayer = m_Spectator.FindAction("PreviousPlayer", throwIfNotFound: true);
+        m_Spectator_FreeLook = m_Spectator.FindAction("FreeLook", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -484,6 +680,79 @@ public class @InputMaster : IInputActionCollection, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // Spectator
+    private readonly InputActionMap m_Spectator;
+    private ISpectatorActions m_SpectatorActionsCallbackInterface;
+    private readonly InputAction m_Spectator_MouseAim;
+    private readonly InputAction m_Spectator_Movement;
+    private readonly InputAction m_Spectator_MovementVertical;
+    private readonly InputAction m_Spectator_NextPlayer;
+    private readonly InputAction m_Spectator_PreviousPlayer;
+    private readonly InputAction m_Spectator_FreeLook;
+    public struct SpectatorActions
+    {
+        private @InputMaster m_Wrapper;
+        public SpectatorActions(@InputMaster wrapper) { m_Wrapper = wrapper; }
+        public InputAction @MouseAim => m_Wrapper.m_Spectator_MouseAim;
+        public InputAction @Movement => m_Wrapper.m_Spectator_Movement;
+        public InputAction @MovementVertical => m_Wrapper.m_Spectator_MovementVertical;
+        public InputAction @NextPlayer => m_Wrapper.m_Spectator_NextPlayer;
+        public InputAction @PreviousPlayer => m_Wrapper.m_Spectator_PreviousPlayer;
+        public InputAction @FreeLook => m_Wrapper.m_Spectator_FreeLook;
+        public InputActionMap Get() { return m_Wrapper.m_Spectator; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(SpectatorActions set) { return set.Get(); }
+        public void SetCallbacks(ISpectatorActions instance)
+        {
+            if (m_Wrapper.m_SpectatorActionsCallbackInterface != null)
+            {
+                @MouseAim.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMouseAim;
+                @MouseAim.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMouseAim;
+                @MouseAim.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMouseAim;
+                @Movement.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovement;
+                @Movement.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovement;
+                @Movement.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovement;
+                @MovementVertical.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovementVertical;
+                @MovementVertical.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovementVertical;
+                @MovementVertical.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnMovementVertical;
+                @NextPlayer.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnNextPlayer;
+                @NextPlayer.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnNextPlayer;
+                @NextPlayer.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnNextPlayer;
+                @PreviousPlayer.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnPreviousPlayer;
+                @PreviousPlayer.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnPreviousPlayer;
+                @PreviousPlayer.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnPreviousPlayer;
+                @FreeLook.started -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnFreeLook;
+                @FreeLook.performed -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnFreeLook;
+                @FreeLook.canceled -= m_Wrapper.m_SpectatorActionsCallbackInterface.OnFreeLook;
+            }
+            m_Wrapper.m_SpectatorActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @MouseAim.started += instance.OnMouseAim;
+                @MouseAim.performed += instance.OnMouseAim;
+                @MouseAim.canceled += instance.OnMouseAim;
+                @Movement.started += instance.OnMovement;
+                @Movement.performed += instance.OnMovement;
+                @Movement.canceled += instance.OnMovement;
+                @MovementVertical.started += instance.OnMovementVertical;
+                @MovementVertical.performed += instance.OnMovementVertical;
+                @MovementVertical.canceled += instance.OnMovementVertical;
+                @NextPlayer.started += instance.OnNextPlayer;
+                @NextPlayer.performed += instance.OnNextPlayer;
+                @NextPlayer.canceled += instance.OnNextPlayer;
+                @PreviousPlayer.started += instance.OnPreviousPlayer;
+                @PreviousPlayer.performed += instance.OnPreviousPlayer;
+                @PreviousPlayer.canceled += instance.OnPreviousPlayer;
+                @FreeLook.started += instance.OnFreeLook;
+                @FreeLook.performed += instance.OnFreeLook;
+                @FreeLook.canceled += instance.OnFreeLook;
+            }
+        }
+    }
+    public SpectatorActions @Spectator => new SpectatorActions(this);
     public interface IPlayerActions
     {
         void OnShoot(InputAction.CallbackContext context);
@@ -500,5 +769,14 @@ public class @InputMaster : IInputActionCollection, IDisposable
     public interface IUIActions
     {
         void OnPause(InputAction.CallbackContext context);
+    }
+    public interface ISpectatorActions
+    {
+        void OnMouseAim(InputAction.CallbackContext context);
+        void OnMovement(InputAction.CallbackContext context);
+        void OnMovementVertical(InputAction.CallbackContext context);
+        void OnNextPlayer(InputAction.CallbackContext context);
+        void OnPreviousPlayer(InputAction.CallbackContext context);
+        void OnFreeLook(InputAction.CallbackContext context);
     }
 }

@@ -5,6 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
 using System.Collections.Generic;
+using System;
 
 namespace Ch.Luca.MyGame
 {
@@ -23,6 +24,10 @@ namespace Ch.Luca.MyGame
         public double remainingTime = 0;
         public double roundTime = 300;
 
+        public static event Action OnSpectateModeActivated = delegate { Debug.Log("Spectating mode enabled"); };
+        public static event Action OnSpectateModeDisabled = delegate { Debug.Log("Spectating mode disabled"); };
+
+
         #endregion
 
         #region MonoBehaviour Methods
@@ -37,13 +42,19 @@ namespace Ch.Luca.MyGame
             {
                 Destroy(this.gameObject);
             }
+
+            SpawnController.OnSpawn += OnSpawn;
         }
 
         void Start()
         {
             Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_READY, true } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+            
+            
         }
+
+        
 
         void Update()
         {
@@ -81,7 +92,7 @@ namespace Ch.Luca.MyGame
 
         public override void OnJoinedRoom()
         {
-            //BeforeStart();
+            OnSpectateModeActivated();
         }
 
         public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
@@ -91,19 +102,65 @@ namespace Ch.Luca.MyGame
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
         {
+            
             object propsTime;
             if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_START_TIME, out propsTime))
             {
                 gameStartTime = (double)propsTime;
             }
+
+            object propsStarted;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_GAME_STARTED, out propsStarted))
+            {
+                hasGameStarted = (bool)propsStarted;
+            }
         }
 
 
-        
+
 
         #endregion
 
         #region Private Methods
+
+        private void OnSpawn()
+        {
+            PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnPlayerDeath += OnPlayerDeath;
+
+            //focus la camera sur le joueur
+            OnSpectateModeDisabled();
+        }
+        private void OnPlayerDeath(int ownerNb)
+        {
+            if(PhotonNetwork.LocalPlayer.ActorNumber == ownerNb)
+            {
+                //activer le mode spectateur seulement si le joueur local meurt
+                OnSpectateModeActivated();
+            }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (GetNumberOfPlayerAlive() <= 1)
+                {
+                    //Faire les trucs de fin de partie
+                    Debug.Log("Restart the game !!");
+                }
+            }
+        }
+
+        private int GetNumberOfPlayerAlive()
+        {
+            int nbPlayerAlive = 0;
+
+            foreach(var player in FindObjectsOfType<PlayerController>())
+            {
+                if (!player.IsDead)
+                {
+                    nbPlayerAlive++;
+                }
+            }
+            return nbPlayerAlive;
+        }
 
         private void UpdateTimer()
         {
@@ -119,13 +176,22 @@ namespace Ch.Luca.MyGame
                 //vérifier que tous les joueurs ont chargé
                 if (CheckAllPlayerReady())
                 {
-                    //informer que les joueurs peuvent spawn
+
+                    //ajouter un évenemment à tous les joueurs
+                    foreach(var player in FindObjectsOfType<PlayerController>())
+                    {
+                        player.OnPlayerDeath += OnPlayerDeath;
+                    }
+
                     hasGameStarted = true;
+
+                    //informer que les joueurs peuvent spawn
                     photonView.RPC("Spawn", RpcTarget.All);
 
                     //Démarrer le timer
                     Hashtable props = new Hashtable();
                     props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
+                    props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
 
                     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
                     
@@ -141,6 +207,7 @@ namespace Ch.Luca.MyGame
 
             foreach (var player in players)
             {
+                
                 object ready;
                 if(player.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_READY, out ready))
                 {
@@ -149,11 +216,17 @@ namespace Ch.Luca.MyGame
                         return false;
                     }
                 }
+
             }
             return true;
         }
 
-        
+        public override void OnPlayerLeftRoom(Player otherPlayer)
+        {
+            PhotonNetwork.DestroyPlayerObjects(otherPlayer);
+        }
+
+
 
         [PunRPC]
         public void Spawn()

@@ -85,8 +85,8 @@ public class Grenade : PickableItem, IThrowableItem
                 player.GetComponent<PlayerController>().RemoveLife(damage);
             }
         }
-        
-        PhotonNetwork.Destroy(gameObject);
+
+        Destroy(gameObject);
         
         
     }

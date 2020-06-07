@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,6 +7,8 @@ using UnityEngine.InputSystem;
 public class CameraManager : MonoBehaviour
 {
     public bool isFollowingLocalPlayer = false;
+    public bool freeCamMode = false;
+    public int isFollowingPlayer = -1;
     public InputMaster inputMaster;
     public GameObject mainCamera;
     
@@ -17,11 +20,17 @@ public class CameraManager : MonoBehaviour
     Vector2 _lookValue = Vector2.zero;
     Vector3 _rotation = Vector3.zero;
     private Transform cameraTransform;
+    private PlayerController[] playerControllers;
+
+
 
     void Awake()
     {
         inputMaster = new InputMaster();
-        
+        SpectatorManager.OnFreeCamMode += FreeCamMode;
+        SpectatorManager.OnFollowPlayersMode += GetPlayersToFollow;
+        SpectatorManager.OnFollowPlayer += FollowPlayer;
+        SpectatorManager.OnFollowLocalPlayer += FollowLocalPlayer;
     }
 
     // Start is called before the first frame update
@@ -31,6 +40,9 @@ public class CameraManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        
+
 
     }
 
@@ -45,9 +57,6 @@ public class CameraManager : MonoBehaviour
     {
         if (isFollowingLocalPlayer)
         {
-
-
-
             if (PlayerController.LocalPlayerInstance != null)
             {
                 cameraTransform.position = PlayerController.LocalPlayerInstance.transform.GetChild(0).transform.position;
@@ -58,10 +67,25 @@ public class CameraManager : MonoBehaviour
 
                     
                 }
-                
+
 
             }
-
+            else
+            {
+                Debug.LogError("No localplayer to follow");
+            }
+        }
+        else if (freeCamMode)
+        {
+            RotateCameraSpectator();
+        }
+        else if(isFollowingPlayer >= 0)
+        {
+            if(playerControllers[isFollowingPlayer] != null)
+            {
+                cameraTransform.position = playerControllers[isFollowingPlayer].transform.GetChild(0).transform.position;
+                cameraTransform.rotation = playerControllers[isFollowingPlayer].transform.rotation;
+            }
             
         }
     }
@@ -74,6 +98,28 @@ public class CameraManager : MonoBehaviour
     public void FollowLocalPlayer()
     {
         isFollowingLocalPlayer = true;
+        freeCamMode = false;
+        isFollowingPlayer = -1;
+    }
+
+    public void FollowPlayer(int playerNumber)
+    {
+        isFollowingLocalPlayer = false;
+        freeCamMode = false;
+        isFollowingPlayer = playerNumber;
+    }
+
+    public void FreeCamMode()
+    {
+        isFollowingLocalPlayer = false;
+        freeCamMode = true;
+        isFollowingPlayer = -1;
+    }
+
+    public void GetPlayersToFollow(PlayerController[] playerControllers)
+    {
+        this.playerControllers = playerControllers;
+        FreeCamMode();
     }
 
     public void RotateCamera()
@@ -84,11 +130,26 @@ public class CameraManager : MonoBehaviour
         _rotation.x += -_lookValue.y * ConfigManager.config.MouseSensitivity * Time.deltaTime;
         _rotation.y += _lookValue.x * ConfigManager.config.MouseSensitivity * Time.deltaTime;
 
+        _rotation.x = Mathf.Clamp(_rotation.x, -90, 90);
+
         cameraTransform.transform.rotation = Quaternion.Euler(_rotation);
 
         Vector3 playerTransformRotation = PlayerController.LocalPlayerInstance.transform.eulerAngles;
 
         PlayerController.LocalPlayerInstance.transform.eulerAngles = new Vector3(playerTransformRotation.x, cameraTransform.transform.rotation.eulerAngles.y, playerTransformRotation.z);
+    }
+
+    public void RotateCameraSpectator()
+    {
+        _lookValue = inputMaster.Spectator.MouseAim.ReadValue<Vector2>();
+
+        _rotation.x += -_lookValue.y * ConfigManager.config.MouseSensitivity * Time.deltaTime;
+        _rotation.y += _lookValue.x * ConfigManager.config.MouseSensitivity * Time.deltaTime;
+
+        _rotation.x = Mathf.Clamp(_rotation.x, -90, 90);
+
+        cameraTransform.transform.rotation = Quaternion.Euler(_rotation);
+
     }
 
     private void OnMoveInput(InputAction.CallbackContext context)

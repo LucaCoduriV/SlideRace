@@ -91,7 +91,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
     void FixedUpdate()
     {
-        if (!GetComponent<Ragdoll>().isRagdoll)
+        if (!GetComponent<Ragdoll>().isRagdoll && !GetComponent<PlayerController>().IsDead)
         {
             
             // Calculate how fast we should be moving
@@ -235,7 +235,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         verticalAxe = movement.y;
     }
 
-    public void OnEnable()
+    public override void OnEnable()
     {
         if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
@@ -244,7 +244,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         inputMaster.Enable();
     }
 
-    public void OnDisable()
+    public override void OnDisable()
     {
         if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
