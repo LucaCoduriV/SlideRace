@@ -13,7 +13,9 @@ namespace Ch.Luca.MyGame
     {
         #region Public Fields
 
-        public static GameManager Instance;
+        public static GameManager instance;
+        public static List<GameObject> players = new List<GameObject>();
+        public static GameObject localPhotonPlayer;
         public GameObject playerPrefab;
 
         public bool hasGameStarted = false;
@@ -23,9 +25,10 @@ namespace Ch.Luca.MyGame
         public double gameStartTime;
         public double remainingTime = 0;
         public double roundTime = 300;
+        public double startCountDown = 5;
 
-        public static event Action OnSpectateModeActivated = delegate { Debug.Log("Spectating mode enabled"); };
-        public static event Action OnSpectateModeDisabled = delegate { Debug.Log("Spectating mode disabled"); };
+        public static event Action OnSpectateModeActivated;
+        public static event Action OnSpectateModeDisabled;
 
 
         #endregion
@@ -34,16 +37,16 @@ namespace Ch.Luca.MyGame
 
         private void Awake()
         {
-            if (Instance == null)
+            if (instance == null)
             {
-                Instance = this.GetComponent<GameManager>();
+                instance = this.GetComponent<GameManager>();
             }
             else
             {
                 Destroy(this.gameObject);
             }
 
-            SpawnController.OnSpawn += OnSpawn;
+            SpawnController.OnLocalPlayerSpawn += OnLocalPlayerSpawn;
         }
 
         void Start()
@@ -65,6 +68,13 @@ namespace Ch.Luca.MyGame
             
         }
 
+        public override void OnDisable()
+        {
+            instance = null;
+            players = null;
+            localPhotonPlayer = null;
+        }
+
         #endregion
 
 
@@ -81,18 +91,14 @@ namespace Ch.Luca.MyGame
             
         public void LeaveRoom()
         {
+            OnSpectateModeActivated();
             PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
             PhotonNetwork.LeaveRoom();
         }
 
-        public override void OnPlayerEnteredRoom(Player other)
-        {
-            //BeforeStart();
-        }
-
         public override void OnJoinedRoom()
         {
-            OnSpectateModeActivated();
+            OnSpectateModeActivated?.Invoke();
         }
 
         public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
@@ -117,33 +123,42 @@ namespace Ch.Luca.MyGame
         }
 
 
+        [PunRPC]
+        public void RestartScene()
+        {
+            PhotonNetwork.LoadLevel(SceneManager.GetActiveScene().buildIndex);
+        }
+
 
 
         #endregion
 
         #region Private Methods
 
-        private void OnSpawn()
+        private void OnLocalPlayerSpawn()
         {
+            Debug.Log("Player spawned");
             PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnPlayerDeath += OnPlayerDeath;
 
             //focus la camera sur le joueur
-            OnSpectateModeDisabled();
+            OnSpectateModeDisabled?.Invoke();
         }
-        private void OnPlayerDeath(int ownerNb)
+        public void OnPlayerDeath(int ownerNb)
         {
-            if(PhotonNetwork.LocalPlayer.ActorNumber == ownerNb)
+            if(PhotonNetwork.LocalPlayer.ActorNumber == ownerNb) 
             {
                 //activer le mode spectateur seulement si le joueur local meurt
-                OnSpectateModeActivated();
+                OnSpectateModeActivated?.Invoke();
             }
 
             if (PhotonNetwork.IsMasterClient)
             {
+                //si il y a moins que 2 joueurs on redémarre la map
                 if (GetNumberOfPlayerAlive() <= 1)
                 {
                     //Faire les trucs de fin de partie
-                    Debug.Log("Restart the game !!");
+                    Debug.Log("Game Restarted");
+                    photonView.RPC("RestartScene", RpcTarget.All);
                 }
             }
         }
@@ -231,7 +246,9 @@ namespace Ch.Luca.MyGame
         [PunRPC]
         public void Spawn()
         {
-            PhotonNetwork.Instantiate("SpawnManager", Vector3.zero, Quaternion.identity);
+            GameObject spawnedPlayer = PhotonNetwork.Instantiate("PhotonPlayer", Vector3.zero, Quaternion.identity);
+
+            localPhotonPlayer = spawnedPlayer;
             
         }
         #endregion

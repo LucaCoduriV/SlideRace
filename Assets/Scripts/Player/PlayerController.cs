@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
     public static GameObject LocalPlayerInstance;
-    public event Action<int> OnPlayerDeath = delegate { Debug.Log("Nothing assigned to OnPlayerDeath"); };
+    public event Action<int> OnPlayerDeath;
 
     #endregion
 
@@ -119,11 +119,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         
     }
     
-
+    
     public void SetLife(float life)
     {
         this.health = life;
-        IsAlive();
+        photonView.RPC("IsAlive", RpcTarget.All);
 
         if (HUDController.GetPlayerToShowHUD() == this)
         {
@@ -164,7 +164,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     public void Kill()
     {
         this.health = 0;
-        IsAlive();
+        photonView.RPC("IsAlive", RpcTarget.All);
 
         if (HUDController.GetPlayerToShowHUD() == this)
         {
@@ -173,7 +173,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    private void IsAlive()
+    [PunRPC]
+    public void IsAlive()
     {
         if (health <= 0)
         {
@@ -188,8 +189,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             {
                 photonView.RPC("RPC_KillPlayer", RpcTarget.OthersBuffered);
             }
-            
-            OnPlayerDeath(photonView.OwnerActorNr); //executer l'évenement
+
+            //OnPlayerDeath?.Invoke(photonView.OwnerActorNr); //executer l'évenement
+            Ch.Luca.MyGame.GameManager.instance.OnPlayerDeath(photonView.OwnerActorNr);
         }
         else isDead = false;
     }
@@ -197,20 +199,22 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public override void OnEnable()
     {
-        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        if (photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
-            return;
+            inputMaster.Enable();
         }
-        inputMaster.Enable();
+        
     }
 
     public override void OnDisable()
     {
-        if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
+        if (photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
-            return;
+            inputMaster.Disable();
         }
-        inputMaster.Disable();
+        OnPlayerDeath = null;
+        LocalPlayerInstance = null;
+        
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

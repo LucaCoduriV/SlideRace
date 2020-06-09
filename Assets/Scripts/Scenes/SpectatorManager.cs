@@ -12,10 +12,10 @@ public class SpectatorManager : MonoBehaviourPun
     public float speed = 1.0f;
     public bool freeCam = false;
 
-    public static event Action OnFreeCamMode = delegate { };
-    public static event Action<PlayerController[]> OnFollowPlayersMode = delegate { };
-    public static event Action<int> OnFollowPlayer = delegate { };
-    public static event Action OnFollowLocalPlayer = delegate { };
+    public static event Action OnFreeCamMode;
+    public static event Action<PlayerController[]> OnFollowPlayersMode;
+    public static event Action<int> OnFollowPlayer;
+    public static event Action OnFollowLocalPlayer;
 
 
     private Vector3 movement = Vector3.zero;
@@ -73,7 +73,7 @@ public class SpectatorManager : MonoBehaviourPun
         inputMaster.Spectator.FreeLook.performed += ctx => {
             if (PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().IsDead)
             {
-                freeCam = true; OnFreeCamMode();
+                freeCam = true; OnFreeCamMode?.Invoke();
             }
             
         };
@@ -95,13 +95,13 @@ public class SpectatorManager : MonoBehaviourPun
 
     private void OnSpectateModeDisabled()
     {
-        OnFollowLocalPlayer();
+        OnFollowLocalPlayer?.Invoke();
     }
 
     private void OnSpectateModeActivated()
     {
         getPlayerControllers();
-        OnFollowPlayersMode(playerControllers);
+        OnFollowPlayersMode?.Invoke(playerControllers);
         freeCam = true;
     }
 
@@ -129,7 +129,7 @@ public class SpectatorManager : MonoBehaviourPun
         {
             spectactingPlayer = 0;
         }
-        OnFollowPlayer(spectactingPlayer);
+        OnFollowPlayer?.Invoke(spectactingPlayer);
     }
     public void followPreviousPlayer()
     {
@@ -141,7 +141,7 @@ public class SpectatorManager : MonoBehaviourPun
         {
             spectactingPlayer = playerControllers.Length - 1;
         }
-        OnFollowPlayer(spectactingPlayer);
+        OnFollowPlayer?.Invoke(spectactingPlayer);
     }
 
 
@@ -179,5 +179,9 @@ public class SpectatorManager : MonoBehaviourPun
     private void OnDisable()
     {
         inputMaster.Disable();
+        OnFreeCamMode = null;
+        OnFollowLocalPlayer = null;
+        OnFreeCamMode = null;
+        OnFollowPlayersMode = null;
     }
 }

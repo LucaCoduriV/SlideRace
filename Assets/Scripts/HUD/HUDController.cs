@@ -93,7 +93,7 @@ public class HUDController : MonoBehaviour
     }
     private void UpdateTimer()
     {
-        timeText.text = GameManager.Instance.remainingTime.ToString();
+        timeText.text = GameManager.instance.remainingTime.ToString();
     }
 
     

@@ -5,12 +5,12 @@ using UnityEngine;
 using Ch.Luca.MyGame;
 using System;
 
-public class SpawnController : MonoBehaviourPun
+public class SpawnController : MonoBehaviourPunCallbacks
 {
     public static SpawnController localInstance;
 
     public Transform mySpawnPoint;
-    public static event Action OnSpawn = delegate { Debug.Log("Spawning..."); };
+    public static event Action OnLocalPlayerSpawn;
 
     
 
@@ -40,11 +40,12 @@ public class SpawnController : MonoBehaviourPun
     [PunRPC]
     void SendSpawn(int spawnNumber)
     {
-        mySpawnPoint = GameManager.Instance.spawnList[spawnNumber];
+
+        mySpawnPoint = GameManager.instance.spawnList[spawnNumber];
         if (photonView.IsMine)
         {
             PhotonNetwork.Instantiate("Crypto", SpawnController.localInstance.mySpawnPoint.position, SpawnController.localInstance.mySpawnPoint.rotation);
-            OnSpawn();
+            OnLocalPlayerSpawn?.Invoke();
         }
         
 
@@ -52,10 +53,10 @@ public class SpawnController : MonoBehaviourPun
 
     public static int GetNextSpawn()
     {
-        GameManager.Instance.previousSpawn++;
-        if(GameManager.Instance.previousSpawn < GameManager.Instance.spawnList.Count)
+        GameManager.instance.previousSpawn++;
+        if(GameManager.instance.previousSpawn < GameManager.instance.spawnList.Count)
         {
-            return GameManager.Instance.previousSpawn;
+            return GameManager.instance.previousSpawn;
         }
         else
         {
@@ -63,4 +64,9 @@ public class SpawnController : MonoBehaviourPun
         }
     }
 
+    public override void OnDisable()
+    {
+        localInstance = null;
+        OnLocalPlayerSpawn = null;
+    }
 }

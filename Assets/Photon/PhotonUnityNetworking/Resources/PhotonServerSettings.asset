@@ -55,6 +55,8 @@ MonoBehaviour:
   - GetNextSpawn
   - RPC_Update_Alive
   - RPC_KillPlayer
+  - RestartScene
+  - IsAlive
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

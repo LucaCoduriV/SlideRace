@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7252644034725317329}
   - component: {fileID: 1193742826850761444}
   m_Layer: 0
-  m_Name: SpawnManager
+  m_Name: PhotonPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -62,7 +62,8 @@ MonoBehaviour:
   prefixField: -1
   Synchronization: 0
   OwnershipTransfer: 0
-  ObservedComponents: []
+  ObservedComponents:
+  - {fileID: 0}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0

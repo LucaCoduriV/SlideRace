@@ -128,7 +128,7 @@ public class UserInterface : MonoBehaviourPunCallbacks
 
     public void OnQuit()
     {
-        GameManager.Instance.LeaveRoom();
+        GameManager.instance.LeaveRoom();
         
     }
 

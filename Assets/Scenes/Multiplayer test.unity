@@ -21763,7 +21763,7 @@ PrefabInstance:
         type: 3}
       propertyPath: spawnList.Array.data[0]
       value: 
-      objectReference: {fileID: 234588063967137307}
+      objectReference: {fileID: 1241159839}
     - target: {fileID: 137470907600475150, guid: eb70acc3a6309ea4a9a5032237e2ed4c,
         type: 3}
       propertyPath: spawnList.Array.data[1]
