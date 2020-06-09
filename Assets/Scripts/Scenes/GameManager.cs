@@ -18,17 +18,27 @@ namespace Ch.Luca.MyGame
         public static GameObject localPhotonPlayer;
         public GameObject playerPrefab;
 
-        public bool hasGameStarted = false;
+        private bool hasGameStarted = false;
+        private bool hasCountDownStarted = false;
         public List<Transform> spawnList;
         public int previousSpawn = -1;
 
         public double gameStartTime;
-        public double remainingTime = 0;
+        private double remainingTime = 300;
         public double roundTime = 300;
-        public double startCountDown = 5;
+
+        public double countDownStartTime;
+        public double countDownTime = 5;
+        private double countDownRemainingTime = 5;
+
+        public double RemainingTime { get => remainingTime; }
+        public double CountDownRemainingTime { get => countDownRemainingTime; }
+        public bool HasGameStarted { get => hasGameStarted; }
+        public bool HasCountDownStarted { get => hasCountDownStarted; }
 
         public static event Action OnSpectateModeActivated;
         public static event Action OnSpectateModeDisabled;
+        private event Action OnCountDownEnd;
 
 
         #endregion
@@ -47,21 +57,24 @@ namespace Ch.Luca.MyGame
             }
 
             SpawnController.OnLocalPlayerSpawn += OnLocalPlayerSpawn;
+            //OnCountDownEnd += StartGame;
         }
 
         void Start()
         {
             Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_READY, true } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-            
-            
         }
 
         
 
         void Update()
         {
-            if (hasGameStarted)
+            if (hasCountDownStarted && countDownRemainingTime > 0)
+            {
+                UpdateCountDown();
+            }
+            else if(hasGameStarted)
             {
                 UpdateTimer();
             }
@@ -108,7 +121,13 @@ namespace Ch.Luca.MyGame
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
         {
-            
+
+            object propsCountDownTime;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, out propsCountDownTime))
+            {
+                countDownStartTime = (double)propsCountDownTime;
+            }
+
             object propsTime;
             if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_START_TIME, out propsTime))
             {
@@ -119,6 +138,12 @@ namespace Ch.Luca.MyGame
             if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_GAME_STARTED, out propsStarted))
             {
                 hasGameStarted = (bool)propsStarted;
+            }
+
+            object propsCountDownStarted;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_GAME_STARTED, out propsCountDownStarted))
+            {
+                hasCountDownStarted = (bool)propsCountDownStarted;
             }
         }
 
@@ -184,6 +209,18 @@ namespace Ch.Luca.MyGame
             remainingTime = roundTime - Mathf.Round((float)incTimer);
         }
 
+        private void UpdateCountDown()
+        {
+            double incTimer = PhotonNetwork.Time - countDownStartTime;
+
+            countDownRemainingTime = countDownTime - Mathf.Round((float)incTimer);
+
+            if(countDownRemainingTime <= 0.1 && !hasGameStarted)
+            {
+                StartGame();
+            }
+        }
+
         private void BeforeStart()
         {
             if (PhotonNetwork.IsMasterClient && !hasGameStarted)
@@ -191,29 +228,45 @@ namespace Ch.Luca.MyGame
                 //vérifier que tous les joueurs ont chargé
                 if (CheckAllPlayerReady())
                 {
-
-                    //ajouter un évenemment à tous les joueurs
-                    foreach(var player in FindObjectsOfType<PlayerController>())
-                    {
-                        player.OnPlayerDeath += OnPlayerDeath;
-                    }
-
-                    hasGameStarted = true;
-
                     //informer que les joueurs peuvent spawn
                     photonView.RPC("Spawn", RpcTarget.All);
 
-                    //Démarrer le timer
+                    //Démarrer le timer du compte à rebours
                     Hashtable props = new Hashtable();
-                    props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
-                    props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
-
+                    props.Add(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, PhotonNetwork.Time);
+                    props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
                     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-                    
+
+                    countDownStartTime = PhotonNetwork.Time;
+                    hasCountDownStarted = true;
+
+                    GetComponent<BoostManager>().TurnBoostOff();
                 }
 
             }
             
+        }
+
+        private void StartGame()
+        {
+            //ajouter un évenemment à tous les joueurs
+            foreach (var player in FindObjectsOfType<PlayerController>())
+            {
+                player.OnPlayerDeath += OnPlayerDeath;
+            }
+
+
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
+            props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+
+            hasGameStarted = true;
+            hasCountDownStarted = false;
+
+            GetComponent<ControlsManager>().TurnControllsOn();
+            GetComponent<BoostManager>().TurnBoostOn();
+
         }
 
         private bool CheckAllPlayerReady()

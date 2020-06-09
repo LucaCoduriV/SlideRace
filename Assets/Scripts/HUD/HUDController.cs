@@ -9,6 +9,7 @@ public class HUDController : MonoBehaviour
     public Text textHP;
     public Text deadMessage;
     public Text timeText;
+    public TMPro.TMP_Text countDownText;
     
 
     private static HUDController instance;
@@ -55,7 +56,18 @@ public class HUDController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdateTimer();
+        
+
+        if (GameManager.instance?.CountDownRemainingTime > 0)
+        {
+            UpdateCountDown();
+        }
+        else
+        {
+            countDownText.gameObject.SetActive(false);
+            UpdateGameTimer();
+        }
+        
 
     }
 
@@ -91,12 +103,19 @@ public class HUDController : MonoBehaviour
             deadMessage.gameObject.SetActive(false);
         }
     }
-    private void UpdateTimer()
+    private void UpdateGameTimer()
     {
-        timeText.text = GameManager.instance.remainingTime.ToString();
+        timeText.text = GameManager.instance.RemainingTime.ToString();
     }
 
-    
+    private void UpdateCountDown()
+    {
+        countDownText.text = GameManager.instance.CountDownRemainingTime.ToString();
+    }
 
-
+    public void OnDisable()
+    {
+        instance = null;
+        playerToShowHUD = null;
+    }
 }

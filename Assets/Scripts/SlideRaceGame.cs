@@ -14,6 +14,8 @@ public class SlideRaceGame
     public const string PLAYER_LOADED_LEVEL = "PlayerLoadedLevel"; //pas encore utilisé
     public const string PLAYER_SPAWN_NUMBER = "PlayerSpawnNumber";
     public const string GAME_START_TIME = "GameStartTime";
+    public const string GAME_COUNT_DOWN_START_TIME = "CountDownStartTime";
     public const string HAS_GAME_STARTED = "HasGameStarted";
+    public const string HAS_COUNT_DOWN_STARTED = "HasCountDownStarted";
 
 }

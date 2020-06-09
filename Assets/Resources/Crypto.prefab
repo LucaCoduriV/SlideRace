@@ -219,6 +219,7 @@ MonoBehaviour:
   gravity: 20
   maxVelocityChange: 10
   acceleration: 4
+  isActivated: 1
   speed: 7
   canJump: 1
   jumpHeight: 1.5

@@ -137,12 +137,12 @@ public class UserInterface : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(0);
     }
 
-    public void OnEnable()
+    public override void OnEnable()
     {
         inputMaster.Enable();
     }
 
-    public void OnDisable()
+    public override void OnDisable()
     {
         inputMaster.Disable();
     }

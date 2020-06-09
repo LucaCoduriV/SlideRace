@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class Boost : MonoBehaviour
 {
+    public bool isActivated = true;
 
     public float speed = 10f;
     public float angleUp = 0f;
     public float angleRight = 0f;
 
     Quaternion rotUp, rotRight;
+
+
 
 
     // Start is called before the first frame update
@@ -27,13 +30,10 @@ public class Boost : MonoBehaviour
 
     public void OnTriggerStay(Collider other)
     {
-        Rigidbody body = other.GetComponent<Rigidbody>();
-
-        if(other.tag == "Player")
-        //body.AddForce(rotRight * rotUp * Vector3.forward * (speed));
-        body.AddForce(rotRight * rotUp * Vector3.forward * (speed), ForceMode.Force);
-        //body.velocity += rotRight * rotUp * Vector3.forward * (speed/10);
-
-
+        if(other.tag == "Player" && isActivated)
+        {
+            Rigidbody body = other.GetComponent<Rigidbody>();
+            body.AddForce(rotRight * rotUp * Vector3.forward * (speed), ForceMode.Force);
+        }
     }
 }

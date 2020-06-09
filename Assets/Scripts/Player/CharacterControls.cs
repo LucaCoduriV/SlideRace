@@ -15,6 +15,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     public float gravity = 20.0f;
     public float maxVelocityChange = 10.0f;
     public float acceleration = 4f;
+    public bool isActivated = false;
     
 
     [Header("On ground")]
@@ -91,7 +92,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
     void FixedUpdate()
     {
-        if (!GetComponent<Ragdoll>().isRagdoll && !GetComponent<PlayerController>().IsDead)
+        if (!GetComponent<Ragdoll>().isRagdoll && !GetComponent<PlayerController>().IsDead && ControlsManager.IsControlsActivated)
         {
             
             // Calculate how fast we should be moving
