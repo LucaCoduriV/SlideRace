@@ -240,7 +240,7 @@ namespace Ch.Luca.MyGame
                     countDownStartTime = PhotonNetwork.Time;
                     hasCountDownStarted = true;
 
-                    GetComponent<BoostManager>().TurnBoostOff();
+                    GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
                 }
 
             }
@@ -264,8 +264,8 @@ namespace Ch.Luca.MyGame
             hasGameStarted = true;
             hasCountDownStarted = false;
 
-            GetComponent<ControlsManager>().TurnControllsOn();
-            GetComponent<BoostManager>().TurnBoostOn();
+            GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
+            GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
 
         }
 

@@ -24,9 +24,7 @@ public class SpawnController : MonoBehaviourPunCallbacks
             }
 
             photonView.RPC("AskSpawn", RpcTarget.MasterClient);
-            
         }
-        
     }
 
     [PunRPC]
@@ -40,7 +38,6 @@ public class SpawnController : MonoBehaviourPunCallbacks
     [PunRPC]
     void SendSpawn(int spawnNumber)
     {
-
         mySpawnPoint = GameManager.instance.spawnList[spawnNumber];
         if (photonView.IsMine)
         {

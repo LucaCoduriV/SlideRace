@@ -210,6 +210,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
+            inputMaster.Player.Shoot.Disable();
+            inputMaster.Player.UseItem.Disable();
+            inputMaster.Player.NextItem.Disable();
+            inputMaster.Player.PreviousItem.Disable();
             inputMaster.Disable();
         }
         OnPlayerDeath = null;

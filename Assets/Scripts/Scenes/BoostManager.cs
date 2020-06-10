@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoostManager : MonoBehaviour
+public class BoostManager : MonoBehaviourPun
 {
     public static List<Boost> boostList;
 
@@ -16,6 +17,7 @@ public class BoostManager : MonoBehaviour
         }
     }
 
+    [PunRPC]
     public void TurnBoostOff()
     {
         foreach (var boost in boostList)
@@ -24,6 +26,7 @@ public class BoostManager : MonoBehaviour
         }
     }
 
+    [PunRPC]
     public void TurnBoostOn()
     {
         foreach (var boost in boostList)
