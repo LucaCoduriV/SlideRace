@@ -40,6 +40,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     private Vector3 MaxVelocity = Vector3.zero;
     private Vector4 capsuleColliderDefault;
     private Vector3 DefaultCameraPosition;
+    private bool wasInstantiated = false;
     #endregion
 
 
@@ -51,19 +52,28 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
         GetComponent<Rigidbody>().freezeRotation = true;
 
+        inputMaster = new InputMaster();
+    }
+
+   
+    
+
+    public void Instantiation()
+    {
         //check if it is our character or not
         if (!photonView.IsMine && PhotonNetwork.IsConnected)
         {
             return;
         }
-        else{
-            inputMaster = new InputMaster();
+        else
+        {
+            
 
-            inputMaster.Player.Movement.performed += ctx => { 
-                if(GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>()); 
+            inputMaster.Player.Movement.performed += ctx => {
+                if (GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>());
             };
             inputMaster.Player.Movement.canceled += ctx => {
-                if(GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>()); 
+                if (GetComponent<PlayerController>().IsDead == false) SetMovementSpeed(ctx.ReadValue<Vector2>());
             };
             inputMaster.Player.Jump.performed += ctx => { if (GetComponent<PlayerController>().IsDead == false) doAJump = true; };
             inputMaster.Player.Jump.canceled += ctx => doAJump = false;
@@ -71,30 +81,28 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             inputMaster.Player.Crouch.canceled += ctx => { photonView.RPC("Crouch", RpcTarget.All, false); };
         }
 
-        
-        
+        inputMaster.Enable();
 
-
+        photonView.RPC("SetInstantiate", RpcTarget.All, true);
     }
 
-    void Update()
-    {   
-        //update Animation
-        UpdateAnimationSpeed();
-
-        if(isTryingToStandUp && CanStandUp())
-        {
-            isTryingToStandUp = false;
-            photonView.RPC("Crouch", RpcTarget.All, false);
-        }
-        
-    }
-
-    void FixedUpdate()
+    void LateUpdate()
     {
-        if (!GetComponent<Ragdoll>().isRagdoll && !GetComponent<PlayerController>().IsDead && ControlsManager.IsControlsActivated)
+        if (wasInstantiated)
         {
-            
+            //update Animation
+            UpdateAnimationSpeed();
+
+            if (isTryingToStandUp && CanStandUp())
+            {
+                isTryingToStandUp = false;
+                photonView.RPC("Crouch", RpcTarget.All, false);
+            }
+        }
+
+        if (!GetComponent<Ragdoll>().isRagdoll && !GetComponent<PlayerController>().IsDead && ControlsManager.IsControlsActivated && wasInstantiated)
+        {
+
             // Calculate how fast we should be moving
             Vector3 targetVelocity = new Vector3(horizontalAxe, 0, verticalAxe);
 
@@ -102,7 +110,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             previousTargetSpeed = Vector3.Lerp(previousTargetSpeed, targetVelocity, acceleration * Time.fixedDeltaTime);
 
             targetVelocity = transform.TransformDirection(previousTargetSpeed);
-            targetVelocity *= speed;
+            targetVelocity *= speed * Time.deltaTime;
 
             // Apply a force that attempts to reach our target velocity
             Vector3 velocity = GetComponent<Rigidbody>().velocity;
@@ -124,14 +132,10 @@ public class CharacterControls : MonoBehaviourPunCallbacks
                 GetComponent<Rigidbody>().AddForce(velocityChange, ForceMode.VelocityChange);
             }
 
-            //get MaxVelocity
-            if(MaxVelocity.sqrMagnitude < GetComponent<Rigidbody>().velocity.sqrMagnitude)
-            {
-                MaxVelocity = GetComponent<Rigidbody>().velocity;
-            }
 
-            
-            
+
+
+
 
 
             // Jump
@@ -144,8 +148,25 @@ public class CharacterControls : MonoBehaviourPunCallbacks
             }
         }
 
+        //get MaxVelocity
+        if (MaxVelocity.sqrMagnitude < GetComponent<Rigidbody>().velocity.sqrMagnitude)
+        {
+            MaxVelocity = GetComponent<Rigidbody>().velocity;
+        }
+
+    }
+
+    void FixedUpdate()
+    {
+        if (PhotonNetwork.IsConnected && !photonView.IsMine)
+            return;
+
+        
+
         // We apply gravity manually for more tuning control
         GetComponent<Rigidbody>().AddForce(new Vector3(0, -gravity * GetComponent<Rigidbody>().mass, 0));
+
+        
 
         grounded = false;
     }
@@ -236,13 +257,19 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         verticalAxe = movement.y;
     }
 
+    [PunRPC]
+    private void SetInstantiate(bool status)
+    {
+        wasInstantiated = status;
+    }
+
     public override void OnEnable()
     {
         if (!photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
             return;
         }
-        inputMaster.Enable();
+        
     }
 
     public override void OnDisable()

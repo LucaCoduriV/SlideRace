@@ -23,7 +23,7 @@ public class Ragdoll : MonoBehaviourPun
             {
                 Physics.IgnoreCollision(collider, GetComponent<Collider>());
 
-                collider.attachedRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                collider.attachedRigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 collider.attachedRigidbody.isKinematic = true;
                 collider.isTrigger = true;
                 collider.enabled = false;

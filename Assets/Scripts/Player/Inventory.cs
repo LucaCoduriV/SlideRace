@@ -8,9 +8,9 @@ public class Inventory : MonoBehaviourPunCallbacks
     [SerializeField] public List<int> inventory_remade;
     [SerializeField] private int selectedObject;
 
-    private Transform rightHandTransform;
-    private Transform leftHandTransform;
-    private Transform headTransform;
+    [SerializeField] private Transform rightHandTransform;
+    [SerializeField] private Transform leftHandTransform;
+    [SerializeField] private Transform headTransform;
 
     private PhotonView contextObject;
     private Transform mainCamera;
@@ -22,12 +22,6 @@ public class Inventory : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     void Start()
     {
-        if (photonView.IsMine)
-        {
-            leftHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().leftHandTransform;
-            rightHandTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().rightHandTransform;
-            headTransform = PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().headTransform;
-        }
         
 
         mainCamera = Camera.main.transform;

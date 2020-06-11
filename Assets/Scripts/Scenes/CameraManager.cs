@@ -27,10 +27,6 @@ public class CameraManager : MonoBehaviour
     void Awake()
     {
         inputMaster = new InputMaster();
-        SpectatorManager.OnFreeCamMode += FreeCamMode;
-        SpectatorManager.OnFollowPlayersMode += GetPlayersToFollow;
-        SpectatorManager.OnFollowPlayer += FollowPlayer;
-        SpectatorManager.OnFollowLocalPlayer += FollowLocalPlayer;
     }
 
     // Start is called before the first frame update
@@ -46,13 +42,6 @@ public class CameraManager : MonoBehaviour
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-        
-    }
-
     private void LateUpdate()
     {
         if (isFollowingLocalPlayer)
@@ -64,15 +53,11 @@ public class CameraManager : MonoBehaviour
                 if (!PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().IsDead && !PlayerController.LocalPlayerInstance.GetComponent<Ragdoll>().isRagdoll && UserInterface.instance.followMouse)
                 {
                     RotateCamera();
-
-                    
                 }
-
-
             }
             else
             {
-                Debug.LogError("No localplayer to follow");
+                Debug.LogError("No localplayer to follow : " + PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().Health);
             }
         }
         else if (freeCamMode)
@@ -160,8 +145,6 @@ public class CameraManager : MonoBehaviour
     public void OnEnable()
     {
         inputMaster.Enable();
-
-        //inputMaster.Player.MouseAim.performed += OnMoveInput;
     }
 
     public void OnDisable()

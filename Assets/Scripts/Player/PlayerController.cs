@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] private Inventory inventory;
 
     private Transform mainCamera;
-    private InputMaster inputMaster;
+    private InputMaster myInputMaster;
     private Animator animator;
 
     #endregion
@@ -51,66 +51,37 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     void Awake()
     {
-
-        if (!photonView.IsMine && PhotonNetwork.IsConnected)
-        {
-            return;
-        }
-
-        if (photonView.IsMine || !PhotonNetwork.IsConnected)
-        {
-            if(PlayerController.LocalPlayerInstance != null)
-            {
-                Destroy(this.gameObject);
-            }
-            else
-            {
-                PlayerController.LocalPlayerInstance = this.gameObject;
-                
-                //set LocalPlayer layer to all GameObject
-                SetLayerRecursively(this.gameObject, 9);
-
-            }
-        }
         
 
-        inputMaster = new InputMaster();
-        inputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
-        inputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.All); };
-        inputMaster.Player.NextItem.performed += ctx =>
+    }
+
+    public void Instantiate()
+    {
+        myInputMaster = new InputMaster();
+        myInputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
+        myInputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.All); };
+        myInputMaster.Player.NextItem.performed += ctx =>
         {
             //changement d'arme
             inventory.photonView.RPC("NextObject", RpcTarget.All);
         };
-        inputMaster.Player.PreviousItem.performed += ctx =>
+        myInputMaster.Player.PreviousItem.performed += ctx =>
         {
             //changement d'arme
             inventory.photonView.RPC("PreviousObject", RpcTarget.All);
         };
 
+        myInputMaster.Player.Shoot.Enable();
+        myInputMaster.Player.UseItem.Enable();
+        myInputMaster.Player.NextItem.Enable();
+        myInputMaster.Player.PreviousItem.Enable();
     }
-
-    
 
     // Start is called before the first frame update
     void Start()
     {
         mainCamera = Camera.main.transform;
-        animator = GetComponent<Animator>();
-
-
-        //si c'est le joueur local on affiche son HUD
-        if (LocalPlayerInstance == this.gameObject)
-        {
-            HUDController.SetPlayerToShowHUD(this);
-
-            //indiquer que le joueur est en vie
-            Hashtable props = new Hashtable();
-            props.Add(SlideRaceGame.PLAYER_IS_ALIVE, true);
-
-            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-        }
-        
+        animator = GetComponent<Animator>();        
     }
 
     // Update is called once per frame
@@ -190,7 +161,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
                 photonView.RPC("RPC_KillPlayer", RpcTarget.OthersBuffered);
             }
 
-            //OnPlayerDeath?.Invoke(photonView.OwnerActorNr); //executer l'évenement
             Ch.Luca.MyGame.GameManager.instance.OnPlayerDeath(photonView.OwnerActorNr);
         }
         else isDead = false;
@@ -201,7 +171,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
-            inputMaster.Enable();
+            
         }
         
     }
@@ -210,11 +180,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         if (photonView.IsMine && PhotonNetwork.IsConnected == true)
         {
-            inputMaster.Player.Shoot.Disable();
-            inputMaster.Player.UseItem.Disable();
-            inputMaster.Player.NextItem.Disable();
-            inputMaster.Player.PreviousItem.Disable();
-            inputMaster.Disable();
+            //myInputMaster.Player.Shoot.Disable();
+            //myInputMaster.Player.UseItem.Disable();
+            //myInputMaster.Player.NextItem.Disable();
+            //myInputMaster.Player.PreviousItem.Disable();
         }
         OnPlayerDeath = null;
         LocalPlayerInstance = null;
@@ -240,6 +209,29 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     {
         this.health = 0;
         IsAlive();
+    }
+
+    [PunRPC]
+    public void TakeControl()
+    {
+        if (photonView.IsMine)
+        {
+            LocalPlayerInstance = this.gameObject;
+            SetLayerRecursively(this.gameObject, 9);
+            FindObjectOfType<CameraManager>().FollowLocalPlayer();
+
+            HUDController.SetPlayerToShowHUD(this);
+
+            //indiquer que le joueur est en vie
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.PLAYER_IS_ALIVE, true);
+
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+
+            GetComponent<CharacterControls>().Instantiation();
+            Instantiate();
+
+        }
     }
 
     private void SetLayerRecursively(GameObject obj, int newLayer)

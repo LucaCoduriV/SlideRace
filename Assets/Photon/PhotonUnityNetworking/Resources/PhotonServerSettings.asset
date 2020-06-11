@@ -61,6 +61,11 @@ MonoBehaviour:
   - TurnBoostOn
   - TurnControllsOff
   - TurnControllsOn
+  - TakeControl
+  - TakeControlTransferedPlayer
+  - instantiation
+  - Instantiation
+  - SetInstantiate
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -12,12 +12,6 @@ public class SpectatorManager : MonoBehaviourPun
     public float speed = 1.0f;
     public bool freeCam = false;
 
-    public static event Action OnFreeCamMode;
-    public static event Action<PlayerController[]> OnFollowPlayersMode;
-    public static event Action<int> OnFollowPlayer;
-    public static event Action OnFollowLocalPlayer;
-
-
     private Vector3 movement = Vector3.zero;
     private Vector3 previousTargetSpeed = Vector3.zero;
     private Transform cameraTransform;
@@ -73,7 +67,8 @@ public class SpectatorManager : MonoBehaviourPun
         inputMaster.Spectator.FreeLook.performed += ctx => {
             if (PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().IsDead)
             {
-                freeCam = true; OnFreeCamMode?.Invoke();
+                freeCam = true;
+                GetComponent<CameraManager>().FreeCamMode();
             }
             
         };
@@ -86,22 +81,17 @@ public class SpectatorManager : MonoBehaviourPun
     private void Start()
     {
         cameraTransform = FindObjectOfType<CameraManager>().mainCamera.transform;
-
-
-        Ch.Luca.MyGame.GameManager.OnSpectateModeActivated += OnSpectateModeActivated;
-        Ch.Luca.MyGame.GameManager.OnSpectateModeDisabled += OnSpectateModeDisabled;
-
     }
 
-    private void OnSpectateModeDisabled()
+    private void spectatorModeDisable()
     {
-        OnFollowLocalPlayer?.Invoke();
+        GetComponent<CameraManager>().FollowLocalPlayer();
     }
 
-    private void OnSpectateModeActivated()
+    private void spectatorModeEnabled()
     {
         getPlayerControllers();
-        OnFollowPlayersMode?.Invoke(playerControllers);
+        GetComponent<CameraManager>().GetPlayersToFollow(playerControllers);
         freeCam = true;
     }
 
@@ -129,7 +119,7 @@ public class SpectatorManager : MonoBehaviourPun
         {
             spectactingPlayer = 0;
         }
-        OnFollowPlayer?.Invoke(spectactingPlayer);
+        GetComponent<CameraManager>().FollowPlayer(spectactingPlayer);
     }
     public void followPreviousPlayer()
     {
@@ -141,7 +131,7 @@ public class SpectatorManager : MonoBehaviourPun
         {
             spectactingPlayer = playerControllers.Length - 1;
         }
-        OnFollowPlayer?.Invoke(spectactingPlayer);
+        GetComponent<CameraManager>().FollowPlayer(spectactingPlayer);
     }
 
 
@@ -179,9 +169,5 @@ public class SpectatorManager : MonoBehaviourPun
     private void OnDisable()
     {
         inputMaster.Disable();
-        OnFreeCamMode = null;
-        OnFollowLocalPlayer = null;
-        OnFreeCamMode = null;
-        OnFollowPlayersMode = null;
     }
 }

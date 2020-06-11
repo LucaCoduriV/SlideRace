@@ -20,8 +20,6 @@ namespace Ch.Luca.MyGame
 
         private bool hasGameStarted = false;
         private bool hasCountDownStarted = false;
-        public List<Transform> spawnList;
-        public int previousSpawn = -1;
 
         public double gameStartTime;
         private double remainingTime = 300;
@@ -55,9 +53,6 @@ namespace Ch.Luca.MyGame
             {
                 Destroy(this.gameObject);
             }
-
-            SpawnController.OnLocalPlayerSpawn += OnLocalPlayerSpawn;
-            //OnCountDownEnd += StartGame;
         }
 
         void Start()
@@ -70,7 +65,7 @@ namespace Ch.Luca.MyGame
 
         void Update()
         {
-            if (hasCountDownStarted && countDownRemainingTime > 0)
+            if (hasCountDownStarted)
             {
                 UpdateCountDown();
             }
@@ -96,17 +91,6 @@ namespace Ch.Luca.MyGame
         public override void OnLeftRoom()
         {
             SceneManager.LoadScene(0);
-        }
-
-        #endregion
-
-        #region Public Methods
-            
-        public void LeaveRoom()
-        {
-            OnSpectateModeActivated();
-            PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
-            PhotonNetwork.LeaveRoom();
         }
 
         public override void OnJoinedRoom()
@@ -141,11 +125,26 @@ namespace Ch.Luca.MyGame
             }
 
             object propsCountDownStarted;
-            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_GAME_STARTED, out propsCountDownStarted))
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_COUNT_DOWN_STARTED, out propsCountDownStarted))
             {
                 hasCountDownStarted = (bool)propsCountDownStarted;
             }
         }
+
+        #endregion
+
+        #region Public Methods
+
+        public void LeaveRoom()
+        {
+            OnSpectateModeActivated();
+            PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
+            PhotonNetwork.LeaveRoom();
+        }
+
+        
+
+        
 
 
         [PunRPC]
@@ -160,14 +159,7 @@ namespace Ch.Luca.MyGame
 
         #region Private Methods
 
-        private void OnLocalPlayerSpawn()
-        {
-            Debug.Log("Player spawned");
-            PlayerController.LocalPlayerInstance.GetComponent<PlayerController>().OnPlayerDeath += OnPlayerDeath;
-
-            //focus la camera sur le joueur
-            OnSpectateModeDisabled?.Invoke();
-        }
+        [Obsolete("Cette methode n'est pas bonne.")]
         public void OnPlayerDeath(int ownerNb)
         {
             if(PhotonNetwork.LocalPlayer.ActorNumber == ownerNb) 
@@ -215,8 +207,10 @@ namespace Ch.Luca.MyGame
 
             countDownRemainingTime = countDownTime - Mathf.Round((float)incTimer);
 
-            if(countDownRemainingTime <= 0.1 && !hasGameStarted)
+            //si le compte à rebours est terminé on lance la game
+            if(countDownRemainingTime <= 0.1)
             {
+                hasCountDownStarted = false;
                 StartGame();
             }
         }
@@ -228,8 +222,9 @@ namespace Ch.Luca.MyGame
                 //vérifier que tous les joueurs ont chargé
                 if (CheckAllPlayerReady())
                 {
-                    //informer que les joueurs peuvent spawn
-                    photonView.RPC("Spawn", RpcTarget.All);
+                    //Faire spawner les joueurs
+                    GetComponent<SpawnManager>().SpawnPlayers();
+                    
 
                     //Démarrer le timer du compte à rebours
                     Hashtable props = new Hashtable();
@@ -238,7 +233,7 @@ namespace Ch.Luca.MyGame
                     PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
                     countDownStartTime = PhotonNetwork.Time;
-                    hasCountDownStarted = true;
+                    hasGameStarted = true;
 
                     GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
                 }
@@ -249,24 +244,18 @@ namespace Ch.Luca.MyGame
 
         private void StartGame()
         {
-            //ajouter un évenemment à tous les joueurs
-            foreach (var player in FindObjectsOfType<PlayerController>())
+            if (PhotonNetwork.IsMasterClient)
             {
-                player.OnPlayerDeath += OnPlayerDeath;
+                Hashtable props = new Hashtable();
+                props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
+                props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
+                PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+
+                hasCountDownStarted = false;
+
+                GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
+                GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
             }
-
-
-            Hashtable props = new Hashtable();
-            props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
-            props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
-            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
-
-            hasGameStarted = true;
-            hasCountDownStarted = false;
-
-            GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
-            GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
-
         }
 
         private bool CheckAllPlayerReady()
@@ -292,17 +281,6 @@ namespace Ch.Luca.MyGame
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             PhotonNetwork.DestroyPlayerObjects(otherPlayer);
-        }
-
-
-
-        [PunRPC]
-        public void Spawn()
-        {
-            GameObject spawnedPlayer = PhotonNetwork.Instantiate("PhotonPlayer", Vector3.zero, Quaternion.identity);
-
-            localPhotonPlayer = spawnedPlayer;
-            
         }
         #endregion
     }

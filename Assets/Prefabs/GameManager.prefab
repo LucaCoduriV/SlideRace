@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 137470907600475151}
   - component: {fileID: 137470906862263686}
   - component: {fileID: 7313251942901112007}
+  - component: {fileID: 1725366100055276839}
+  - component: {fileID: 137470906862263687}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -72,20 +74,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 800267042043753921, guid: 5a00b252a592c1a4db1c34ad8c51576d,
     type: 3}
-  spawnList:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  previousSpawn: -1
   gameStartTime: 0
   roundTime: 300
   countDownStartTime: 0
@@ -146,3 +134,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a65b93ff723382f4eacd91831c5bd983, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1725366100055276839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137470907600475139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0d69cb62bd350347bfdaf7a8d321574, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &137470906862263687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137470907600475139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6648ff0d2c998924084805fa552a628e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnList:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

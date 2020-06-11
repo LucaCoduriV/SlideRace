@@ -108,11 +108,12 @@ GameObject:
   - component: {fileID: 1932595955}
   - component: {fileID: 1843834688}
   - component: {fileID: 2619902981751206456}
-  - component: {fileID: 1932595953}
   - component: {fileID: 1932595954}
   - component: {fileID: 8142379199251414120}
   - component: {fileID: 5019398898689850820}
   - component: {fileID: 1976453888}
+  - component: {fileID: 7964593611288005173}
+  - component: {fileID: 1103894631842452129}
   m_Layer: 0
   m_Name: Crypto
   m_TagString: Player
@@ -238,23 +239,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventory_remade: 
   selectedObject: 0
+  rightHandTransform: {fileID: 2359901365935933126}
+  leftHandTransform: {fileID: 5999482715748416824}
+  headTransform: {fileID: 2143396888221401376}
   animatorKnife: {fileID: 22100000, guid: ee8479ea3325ad443bd011bb970f6d02, type: 2}
   animatorDefault: {fileID: 9100000, guid: 80c2458c3e4b7d8408d5b3c32753754c, type: 2}
---- !u!114 &1932595953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 800267042043753921}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
 --- !u!114 &1932595954
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,12 +259,13 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 2
   OwnershipTransfer: 0
   ObservedComponents:
-  - {fileID: 1932595953}
+  - {fileID: 7964593611288005173}
   - {fileID: 1932595955}
   - {fileID: 8142379199251414120}
+  - {fileID: 1103894631842452129}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -301,7 +291,7 @@ MonoBehaviour:
     SynchronizeType: 2
     Name: VelX
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 2
     Name: OnGround
   - Type: 9
     SynchronizeType: 1
@@ -348,6 +338,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bodyParts: []
   isRagdoll: 0
+--- !u!114 &7964593611288005173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800267042043753921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 4
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 5
+    ExtrapolateOption: 0
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 2
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 0
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
+--- !u!114 &1103894631842452129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800267042043753921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 1
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
 --- !u!1 &804453637380244597
 GameObject:
   m_ObjectHideFlags: 0
