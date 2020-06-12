@@ -113,7 +113,7 @@ GameObject:
   - component: {fileID: 5019398898689850820}
   - component: {fileID: 1976453888}
   - component: {fileID: 7964593611288005173}
-  - component: {fileID: 1103894631842452129}
+  - component: {fileID: 227850053138768495}
   m_Layer: 0
   m_Name: Crypto
   m_TagString: Player
@@ -265,7 +265,7 @@ MonoBehaviour:
   - {fileID: 7964593611288005173}
   - {fileID: 1932595955}
   - {fileID: 8142379199251414120}
-  - {fileID: 1103894631842452129}
+  - {fileID: 227850053138768495}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -371,7 +371,7 @@ MonoBehaviour:
     InterpolateOption: 0
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 0
---- !u!114 &1103894631842452129
+--- !u!114 &227850053138768495
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

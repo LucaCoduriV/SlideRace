@@ -12,28 +12,39 @@ public class Boost : MonoBehaviour
 
     Quaternion rotUp, rotRight;
 
-
+    Dictionary<Collider, Collider> colliders = new Dictionary<Collider, Collider>();
 
 
     // Start is called before the first frame update
     void Start()
     {
+
         rotUp = Quaternion.AngleAxis(angleUp, Vector3.up);
         rotRight = Quaternion.AngleAxis(angleRight, Vector3.right);
     }
 
+    
+
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        
+        foreach (KeyValuePair<Collider, Collider> entry in colliders)
+        {
+            if (entry.Value.tag == "Player" && isActivated && entry.Value.GetComponent<PlayerController>().photonView.IsMine)
+            {
+                Rigidbody body = entry.Value.GetComponent<Rigidbody>();
+                body.AddForce(rotRight * rotUp * Vector3.forward * (speed * 100 * Time.fixedDeltaTime), ForceMode.Force);
+            }
+        }
     }
 
-    public void OnTriggerStay(Collider other)
+    public void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Player" && isActivated)
-        {
-            Rigidbody body = other.GetComponent<Rigidbody>();
-            body.AddForce(rotRight * rotUp * Vector3.forward * (speed), ForceMode.Force);
-        }
+        colliders.Add(other, other);
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        colliders.Remove(other);
     }
 }

@@ -75,11 +75,6 @@ public class CameraManager : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        
-    }
-
     public void FollowLocalPlayer()
     {
         isFollowingLocalPlayer = true;
