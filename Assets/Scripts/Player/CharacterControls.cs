@@ -111,6 +111,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         animator = GetComponent<Animator>();
         cameraTransform = Camera.main.transform;
 
+        GetComponent<PlayerNamePlate>().Instantiate();
 
     }
 
@@ -159,49 +160,52 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
     void FixedUpdate()
     {
-        //Check if mover is grounded;
-        mover.CheckForGround();
+        if (wasInstantiated && photonView.IsMine)
+        {
 
-        //Determine controller state;
-        currentControllerState = DetermineControllerState();
-        UpdateAnimation();
+            //Check if mover is grounded;
+            mover.CheckForGround();
 
-        //Apply friction and gravity to 'momentum';
-        HandleMomentum();
+            //Determine controller state;
+            currentControllerState = DetermineControllerState();
+            UpdateAnimation();
 
-        //Check if the player has initiated a jump;
-        HandleJumping();
+            //Apply friction and gravity to 'momentum';
+            HandleMomentum();
 
-        //Calculate movement velocity;
-        Vector3 _velocity = CalculateMovementVelocity();
+            //Check if the player has initiated a jump;
+            HandleJumping();
 
-        //If local momentum is used, transform momentum into world space first;
-        Vector3 _worldMomentum = momentum;
-        if (useLocalMomentum)
-            _worldMomentum = transform.localToWorldMatrix * momentum;
+            //Calculate movement velocity;
+            Vector3 _velocity = CalculateMovementVelocity();
 
-        //Add current momentum to velocity;
-        _velocity += _worldMomentum;
+            //If local momentum is used, transform momentum into world space first;
+            Vector3 _worldMomentum = momentum;
+            if (useLocalMomentum)
+                _worldMomentum = transform.localToWorldMatrix * momentum;
 
-        //If player is grounded or sliding on a slope, extend mover's sensor range;
-        //This enables the player to walk up/down stairs and slopes without losing ground contact;
-        mover.SetExtendSensorRange(IsGrounded());
+            //Add current momentum to velocity;
+            _velocity += _worldMomentum;
 
-        //Set mover velocity;		
-        mover.SetVelocity(_velocity);
+            //If player is grounded or sliding on a slope, extend mover's sensor range;
+            //This enables the player to walk up/down stairs and slopes without losing ground contact;
+            mover.SetExtendSensorRange(IsGrounded());
 
-        //Store velocity for next frame;
-        savedVelocity = _velocity;
-        savedMovementVelocity = _velocity - _worldMomentum;
+            //Set mover velocity;		
+            mover.SetVelocity(_velocity);
 
-        //Reset jump key booleans;
-        jumpKeyWasLetGo = false;
-        jumpKeyWasPressed = false;
+            //Store velocity for next frame;
+            savedVelocity = _velocity;
+            savedMovementVelocity = _velocity - _worldMomentum;
 
-        //Reset ceiling detector, if one was attached to this gameobject;
-        //if (ceilingDetector != null)
-        //    ceilingDetector.ResetFlags();
+            //Reset jump key booleans;
+            jumpKeyWasLetGo = false;
+            jumpKeyWasPressed = false;
 
+            //Reset ceiling detector, if one was attached to this gameobject;
+            if (ceilingDetector != null)
+                ceilingDetector.ResetFlags();
+        }
     }
 
     private void UpdateAnimation()

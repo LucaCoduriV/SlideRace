@@ -6,19 +6,10 @@ using UnityEngine.InputSystem;
 
 public class CameraManager : MonoBehaviour
 {
-    public bool isFollowingLocalPlayer = false;
-    public bool freeCamMode = false;
     public int isFollowingPlayer = -1;
     public InputMaster inputMaster;
     public GameObject mainCamera;
-    
 
-    float xRotation = 0.0f;
-    float mouseX = 0.0f;
-    float mouseY = 0.0f;
-
-    Vector2 _lookValue = Vector2.zero;
-    Vector3 _rotation = Vector3.zero;
     private Transform cameraTransform;
     private PlayerController[] playerControllers;
     private PlayerController localPlayerController;
@@ -32,11 +23,6 @@ public class CameraManager : MonoBehaviour
 
     public CameraMode cameraMode = CameraMode.Free;
 
-    void Awake()
-    {
-        inputMaster = new InputMaster();
-    }
-
     // Start is called before the first frame update
     void Start()
     {
@@ -44,24 +30,27 @@ public class CameraManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        
-
-
     }
 
     private void LateUpdate()
     {
+        UpdateCameraPosition();
+    }
 
+    private void UpdateCameraPosition()
+    {
         switch (cameraMode)
         {
             case CameraMode.FollowLocalPlayer:
+
                 if (PlayerController.LocalPlayerInstance != null)
                 {
                     cameraTransform.position = PlayerController.LocalPlayerInstance.transform.GetChild(0).transform.position;
                 }
                 break;
+
             case CameraMode.FollowOtherPlayer:
+
                 if (isFollowingPlayer >= 0)
                 {
                     if (playerControllers[isFollowingPlayer] != null)
@@ -71,8 +60,11 @@ public class CameraManager : MonoBehaviour
                     }
                 }
                 break;
+
             case CameraMode.Free:
+
                 break;
+
             default:
                 break;
         }
@@ -103,15 +95,5 @@ public class CameraManager : MonoBehaviour
     {
         this.playerControllers = playerControllers;
         FreeCamMode();
-    }
-
-    public void OnEnable()
-    {
-        inputMaster.Enable();
-    }
-
-    public void OnDisable()
-    {
-        inputMaster.Disable();
     }
 }

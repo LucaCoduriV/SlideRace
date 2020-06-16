@@ -11,26 +11,28 @@ public class PlayerNamePlate : MonoBehaviourPun
 
     Transform cameraTransform;
 
+    private void Awake()
+    {
+        namePlate.gameObject.SetActive(false);
+    }
+
     public void Instantiate()
     {
+        namePlate.gameObject.SetActive(true);
         cameraTransform = Camera.main.transform;
         if (PhotonNetwork.IsConnected)
         {
             namePlateText.text = photonView.Owner.NickName;
         }
         
-
-        if (photonView.IsMine)
-        {
-            namePlateText.gameObject.SetActive(false);
-        }
     }
 
     private void Update()
     {
         if (!photonView.IsMine)
         {
-            namePlate.LookAt(cameraTransform.position);
+            if(cameraTransform != null)
+                namePlate.LookAt(cameraTransform.position);
             
         }
     }

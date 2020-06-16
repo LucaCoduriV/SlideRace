@@ -116,6 +116,7 @@ GameObject:
   - component: {fileID: 56035295524846391}
   - component: {fileID: 5511327687258633055}
   - component: {fileID: 6321009663807536068}
+  - component: {fileID: 4062666538770258105}
   m_Layer: 0
   m_Name: Crypto
   m_TagString: Player
@@ -430,6 +431,21 @@ MonoBehaviour:
   sensorArrayRayCount: 6
   sensorArrayRowsAreOffset: 0
   raycastArrayPreviewPositions: []
+--- !u!114 &4062666538770258105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800267042043753921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 955f1edbd7825b64793b9629677e95e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ceilingAngleLimit: 10
+  ceilingDetectionMethod: 1
+  isInDebugMode: 1
 --- !u!1 &804453637380244597
 GameObject:
   m_ObjectHideFlags: 0
