@@ -75,6 +75,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         myInputMaster.Player.UseItem.Enable();
         myInputMaster.Player.NextItem.Enable();
         myInputMaster.Player.PreviousItem.Enable();
+
+        GetComponent<PlayerNamePlate>().Instantiate();
     }
 
     // Start is called before the first frame update

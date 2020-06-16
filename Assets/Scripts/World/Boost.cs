@@ -30,11 +30,11 @@ public class Boost : MonoBehaviour
     {
         foreach (KeyValuePair<Collider, Collider> entry in colliders)
         {
-            if (entry.Value.tag == "Player" && isActivated && entry.Value.GetComponent<PlayerController>().photonView.IsMine)
-            {
+            //if (entry.Value.tag == "Player" && isActivated && entry.Value.GetComponent<PlayerController>().photonView.IsMine)
+            //{
                 Rigidbody body = entry.Value.GetComponent<Rigidbody>();
-                body.AddForce(rotRight * rotUp * Vector3.forward * (speed * 100 * Time.fixedDeltaTime), ForceMode.Force);
-            }
+                body.AddForce(rotRight * rotUp * Vector3.forward * (speed  * Time.fixedDeltaTime), ForceMode.VelocityChange);
+            //}
         }
     }
 

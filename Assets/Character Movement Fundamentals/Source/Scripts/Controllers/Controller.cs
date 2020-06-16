@@ -17,6 +17,5 @@ namespace CMF
 		public delegate void VectorEvent(Vector3 v);
 		public VectorEvent OnJump;
 		public VectorEvent OnLand;
-
 	}
 }

@@ -11,7 +11,7 @@ public class PlayerNamePlate : MonoBehaviourPun
 
     Transform cameraTransform;
 
-    private void Start()
+    public void Instantiate()
     {
         cameraTransform = Camera.main.transform;
         if (PhotonNetwork.IsConnected)
