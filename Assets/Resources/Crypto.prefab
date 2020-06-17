@@ -114,7 +114,6 @@ GameObject:
   - component: {fileID: 7964593611288005173}
   - component: {fileID: 227850053138768495}
   - component: {fileID: 56035295524846391}
-  - component: {fileID: 5511327687258633055}
   - component: {fileID: 6321009663807536068}
   - component: {fileID: 4062666538770258105}
   m_Layer: 0
@@ -188,9 +187,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.32
-  m_Height: 1.395
+  m_Height: 1.5066
   m_Direction: 1
-  m_Center: {x: 0, y: 1.1625, z: 0}
+  m_Center: {x: 0, y: 1.1067, z: 0}
 --- !u!114 &1932595955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,6 +202,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37b94fc934260e44daf94ae702d0e657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wasInstantiated: 0
   health: 100
   leftHandTransform: {fileID: 5999482715748416824}
   rightHandTransform: {fileID: 2359901365935933126}
@@ -366,8 +366,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64179f3720bbfe947b7724caa67b7c1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizeVelocity: 1
-  m_SynchronizeAngularVelocity: 1
+  m_SynchronizeVelocity: 0
+  m_SynchronizeAngularVelocity: 0
   m_TeleportEnabled: 0
   m_TeleportIfDistanceGreaterThan: 3
 --- !u!114 &56035295524846391
@@ -393,22 +393,6 @@ MonoBehaviour:
   slopeLimit: 80
   movementSpeed: 7
   airControl: 0.4
---- !u!114 &5511327687258633055
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 800267042043753921}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9819db9f56d8ad4c83e05807a209fc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  horizontalInputAxis: Horizontal
-  verticalInputAxis: Vertical
-  jumpKey: 32
-  useRawInput: 1
 --- !u!114 &6321009663807536068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -444,7 +428,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ceilingAngleLimit: 10
-  ceilingDetectionMethod: 1
+  ceilingDetectionMethod: 0
   isInDebugMode: 1
 --- !u!1 &804453637380244597
 GameObject:

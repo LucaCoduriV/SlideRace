@@ -30,11 +30,7 @@ public class Boost : MonoBehaviour
     {
         foreach (KeyValuePair<Collider, Collider> entry in colliders)
         {
-            //if (entry.Value.tag == "Player" && isActivated && entry.Value.GetComponent<PlayerController>().photonView.IsMine)
-            //{
-                Rigidbody body = entry.Value.GetComponent<Rigidbody>();
-                body.AddForce(rotRight * rotUp * Vector3.forward * (speed  * Time.fixedDeltaTime), ForceMode.VelocityChange);
-            //}
+            
         }
     }
 
@@ -46,5 +42,14 @@ public class Boost : MonoBehaviour
     public void OnTriggerExit(Collider other)
     {
         colliders.Remove(other);
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Player" && isActivated && other.GetComponent<PlayerController>().photonView.IsMine)
+        {
+            Rigidbody body = other.GetComponent<Rigidbody>();
+            body.AddForce(rotRight * rotUp * Vector3.forward * (speed * Time.fixedDeltaTime), ForceMode.VelocityChange);
+        }
     }
 }

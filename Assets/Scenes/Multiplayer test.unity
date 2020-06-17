@@ -3198,7 +3198,7 @@ GameObject:
   - component: {fileID: 138968417}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Ground
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5850,7 +5850,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh35100
+  m_Name: pb_Mesh53140
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -14128,7 +14128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: 90
   angleRight: 0
 --- !u!114 &1925493808
@@ -14144,7 +14144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: 217
   angleRight: 0
 --- !u!114 &1925493809
@@ -14160,7 +14160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: 90
   angleRight: 0
 --- !u!95 &1925493810
@@ -14411,7 +14411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: 0
   angleRight: 0
 --- !u!114 &1925493853
@@ -14427,7 +14427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: -35
   angleRight: 0
 --- !u!114 &1925493854
@@ -14443,7 +14443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: -35
   angleRight: 0
 --- !u!114 &1925493855
@@ -14459,7 +14459,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: -35
   angleRight: 0
 --- !u!114 &1925493856
@@ -14475,7 +14475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActivated: 1
-  speed: 2
+  speed: 230
   angleUp: 0
   angleRight: 0
 --- !u!1 &1932351462
@@ -22530,6 +22530,36 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb70acc3a6309ea4a9a5032237e2ed4c, type: 3}
+--- !u!1 &137470906862263685 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 137470907600475139, guid: eb70acc3a6309ea4a9a5032237e2ed4c,
+    type: 3}
+  m_PrefabInstance: {fileID: 137470906862263684}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &137470906862263686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137470906862263685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c2da4373bc55c246931abf135dcbf47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &137470906862263687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137470906862263685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 394280f7fb0690c4397d1a391d9db722, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!64 &151141027070935169
 MeshCollider:
   m_ObjectHideFlags: 0

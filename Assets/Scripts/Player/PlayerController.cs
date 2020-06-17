@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
     public static GameObject LocalPlayerInstance;
     public event Action<int> OnPlayerDeath;
+    public bool wasInstantiated = false;
 
     #endregion
 
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     private Transform mainCamera;
     private InputMaster myInputMaster;
     private Animator animator;
+    private PlayerKeyboardInput characterInput;
 
     #endregion
 
@@ -57,26 +59,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     public void Instantiate()
     {
-        myInputMaster = new InputMaster();
-        myInputMaster.Player.Shoot.performed += ctx => { GetComponent<Inventory>().UseSelectedItem(); };
-        myInputMaster.Player.UseItem.performed += ctx => { GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.All); };
-        myInputMaster.Player.NextItem.performed += ctx =>
-        {
-            //changement d'arme
-            inventory.photonView.RPC("NextObject", RpcTarget.All);
-        };
-        myInputMaster.Player.PreviousItem.performed += ctx =>
-        {
-            //changement d'arme
-            inventory.photonView.RPC("PreviousObject", RpcTarget.All);
-        };
-
-        myInputMaster.Player.Shoot.Enable();
-        myInputMaster.Player.UseItem.Enable();
-        myInputMaster.Player.NextItem.Enable();
-        myInputMaster.Player.PreviousItem.Enable();
-
         GetComponent<PlayerNamePlate>().Instantiate();
+        FindObjectOfType<SpectatorManager>().SpectatorModeDisable();
+        characterInput = FindObjectOfType<PlayerKeyboardInput>();
+
+        wasInstantiated = true;
     }
 
     // Start is called before the first frame update
@@ -89,6 +76,26 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     // Update is called once per frame
     void Update()
     {
+        if (!isDead && wasInstantiated)
+        {
+            if (characterInput != null)
+            {
+                if (characterInput.IsShootPressed())
+                    GetComponent<Inventory>().UseSelectedItem();
+
+                if (characterInput.IsUsePressed())
+                    GetComponent<Ragdoll>().photonView.RPC("TurnRagdollOn", RpcTarget.All);
+
+                if (characterInput.IsNextItemPressed())
+                    inventory.photonView.RPC("NextObject", RpcTarget.All);
+
+                if (characterInput.IsPreviousItemPressed())
+                    inventory.photonView.RPC("PreviousObject", RpcTarget.All);
+
+            }
+        }
+
+        
         
     }
     
@@ -147,7 +154,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
-    public void IsAlive()
+    public bool IsAlive()
     {
         if (health <= 0)
         {
@@ -166,6 +173,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             Ch.Luca.MyGame.GameManager.instance.OnPlayerDeath(photonView.OwnerActorNr);
         }
         else isDead = false;
+
+        return isDead;
     }
 
 

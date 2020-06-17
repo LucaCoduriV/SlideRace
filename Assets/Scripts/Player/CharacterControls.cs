@@ -30,7 +30,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     private Animator animator;
 
     //References to attached components;
-    protected CharacterInput characterInput;
+    protected PlayerKeyboardInput characterInput;
     protected Mover mover;
     protected CeilingDetector ceilingDetector;
     #endregion
@@ -82,6 +82,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
 
     //Saved horizontal movement velocity from last frame;
     Vector3 savedMovementVelocity = Vector3.zero;
+    Vector3 lastFrameVelocity = Vector3.zero;
 
     //Movement speed;
     public float movementSpeed = 7f;
@@ -105,7 +106,7 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         rb.freezeRotation = true;
 
         inputMaster = new InputMaster();
-        characterInput = GetComponent<CharacterInput>();
+        characterInput = FindObjectOfType<PlayerKeyboardInput>();
 
         playerController = GetComponent<PlayerController>();
         animator = GetComponent<Animator>();
@@ -127,8 +128,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         }
         else
         {
-            inputMaster.Player.Jump.performed += ctx => { if (playerController == false) doAJump = true; };
-            inputMaster.Player.Jump.canceled += ctx => doAJump = false;
+            //inputMaster.Player.Jump.performed += ctx => { if (playerController == false) doAJump = true; };
+            //inputMaster.Player.Jump.canceled += ctx => doAJump = false;
             inputMaster.Player.Crouch.performed += ctx => { photonView.RPC("Crouch", RpcTarget.All, true); };
             inputMaster.Player.Crouch.canceled += ctx => { photonView.RPC("Crouch", RpcTarget.All, false); };
 
@@ -497,6 +498,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
     //Calculate and return movement velocity based on player input, controller state, ground normal [...];
     protected Vector3 CalculateMovementVelocity()
     {
+        float acceleration = 10;
+
         //Calculate (normalized) movement direction;
         Vector3 _velocity = CalculateMovementDirection();
 
@@ -509,6 +512,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         //If controller is not grounded, multiply movement velocity with 'airControl';
         if (!(currentControllerState == ControllerState.Grounded))
             _velocity = _velocityDirection * movementSpeed * airControl;
+
+        //_velocity = Vector3.Lerp(lastFrameVelocity, _velocity, acceleration * Time.deltaTime);
 
         return _velocity;
     }
