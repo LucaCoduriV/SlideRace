@@ -23,17 +23,6 @@ public class Boost : MonoBehaviour
         rotRight = Quaternion.AngleAxis(angleRight, Vector3.right);
     }
 
-    
-
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        foreach (KeyValuePair<Collider, Collider> entry in colliders)
-        {
-            
-        }
-    }
-
     public void OnTriggerEnter(Collider other)
     {
         colliders.Add(other, other);

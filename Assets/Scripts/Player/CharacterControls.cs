@@ -128,12 +128,8 @@ public class CharacterControls : MonoBehaviourPunCallbacks
         }
         else
         {
-            //inputMaster.Player.Jump.performed += ctx => { if (playerController == false) doAJump = true; };
-            //inputMaster.Player.Jump.canceled += ctx => doAJump = false;
             inputMaster.Player.Crouch.performed += ctx => { photonView.RPC("Crouch", RpcTarget.All, true); };
             inputMaster.Player.Crouch.canceled += ctx => { photonView.RPC("Crouch", RpcTarget.All, false); };
-
-            transform.localPosition = Vector3.zero;
         }
 
         inputMaster.Enable();
