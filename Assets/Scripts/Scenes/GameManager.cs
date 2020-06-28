@@ -38,6 +38,16 @@ namespace Ch.Luca.MyGame
         public static event Action OnSpectateModeDisabled;
         private event Action OnCountDownEnd;
 
+        public enum GameStatus
+        {
+            WaitingForPlayers,
+            CountDown,
+            GameStarted,
+            GameFinished
+        }
+
+        public GameStatus gameStatus = GameStatus.WaitingForPlayers;
+
 
         #endregion
 
@@ -68,6 +78,14 @@ namespace Ch.Luca.MyGame
             if (hasCountDownStarted)
             {
                 UpdateCountDown();
+
+                //si le compte à rebours est terminé on lance la game
+                if (countDownRemainingTime <= 0.1)
+                {
+                    hasCountDownStarted = false;
+                    StartGame();
+                }
+
             }
             else if(hasGameStarted)
             {
@@ -100,7 +118,15 @@ namespace Ch.Luca.MyGame
 
         public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
         {
-            BeforeStart();
+            //faire les vérification seulement si l'on est le masterclient
+            if (PhotonNetwork.IsMasterClient && !hasGameStarted)
+            {
+                //vérifier que tous les joueurs ont chargé
+                if (CheckAllPlayerReady())
+                {
+                    GameSetup();
+                }
+            }
         }
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
@@ -206,39 +232,25 @@ namespace Ch.Luca.MyGame
             double incTimer = PhotonNetwork.Time - countDownStartTime;
 
             countDownRemainingTime = countDownTime - Mathf.Round((float)incTimer);
-
-            //si le compte à rebours est terminé on lance la game
-            if(countDownRemainingTime <= 0.1)
-            {
-                hasCountDownStarted = false;
-                StartGame();
-            }
         }
 
-        private void BeforeStart()
+        private void GameSetup()
         {
-            if (PhotonNetwork.IsMasterClient && !hasGameStarted)
-            {
-                //vérifier que tous les joueurs ont chargé
-                if (CheckAllPlayerReady())
-                {
-                    //Faire spawner les joueurs
-                    GetComponent<SpawnManager>().SpawnPlayers();
+            
+            //Faire spawner les joueurs
+            GetComponent<SpawnManager>().SpawnPlayers();
                     
 
-                    //Démarrer le timer du compte à rebours
-                    Hashtable props = new Hashtable();
-                    props.Add(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, PhotonNetwork.Time);
-                    props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
-                    PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+            //Démarrer le timer du compte à rebours
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, PhotonNetwork.Time);
+            props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
-                    countDownStartTime = PhotonNetwork.Time;
-                    hasGameStarted = true;
+            countDownStartTime = PhotonNetwork.Time;
+            hasGameStarted = true;
 
-                    GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
-                }
-
-            }
+            GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
             
         }
 
