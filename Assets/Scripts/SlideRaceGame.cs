@@ -17,5 +17,22 @@ public class SlideRaceGame
     public const string GAME_COUNT_DOWN_START_TIME = "CountDownStartTime";
     public const string HAS_GAME_STARTED = "HasGameStarted";
     public const string HAS_COUNT_DOWN_STARTED = "HasCountDownStarted";
+    public const string GAME_STATUS = "GameStatus";
 
+}
+
+public enum GameStatus
+{
+    WaitingForPlayers,
+    CountDown,
+    Started,
+    Finished,
+    Restarting
+}
+
+public enum LocalPlayerStatus
+{
+    Dead,
+    Alive,
+    Spectating
 }

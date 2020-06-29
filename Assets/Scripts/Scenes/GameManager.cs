@@ -18,9 +18,6 @@ namespace Ch.Luca.MyGame
         public static GameObject localPhotonPlayer;
         public GameObject playerPrefab;
 
-        private bool hasGameStarted = false;
-        private bool hasCountDownStarted = false;
-
         public double gameStartTime;
         private double remainingTime = 300;
         public double roundTime = 300;
@@ -31,20 +28,12 @@ namespace Ch.Luca.MyGame
 
         public double RemainingTime { get => remainingTime; }
         public double CountDownRemainingTime { get => countDownRemainingTime; }
-        public bool HasGameStarted { get => hasGameStarted; }
-        public bool HasCountDownStarted { get => hasCountDownStarted; }
 
         public static event Action OnSpectateModeActivated;
         public static event Action OnSpectateModeDisabled;
         private event Action OnCountDownEnd;
 
-        public enum GameStatus
-        {
-            WaitingForPlayers,
-            CountDown,
-            GameStarted,
-            GameFinished
-        }
+        
 
         public GameStatus gameStatus = GameStatus.WaitingForPlayers;
 
@@ -75,21 +64,45 @@ namespace Ch.Luca.MyGame
 
         void Update()
         {
-            if (hasCountDownStarted)
+            switch (gameStatus)
             {
-                UpdateCountDown();
+                case GameStatus.WaitingForPlayers:
+                    //faire les vérification seulement si l'on est le masterclient
+                    if (PhotonNetwork.IsMasterClient)
+                    {
+                        //vérifier que tous les joueurs ont chargé
+                        if (CheckAllPlayerReady())
+                        {
+                            GameSetup();
+                        }
+                    }
+                    break;
 
-                //si le compte à rebours est terminé on lance la game
-                if (countDownRemainingTime <= 0.1)
-                {
-                    hasCountDownStarted = false;
-                    StartGame();
-                }
+                case GameStatus.CountDown:
+                    
+                    UpdateCountDown();
 
-            }
-            else if(hasGameStarted)
-            {
-                UpdateTimer();
+                    //si le compte à rebours est terminé on lance la game
+                    if (countDownRemainingTime <= 0.1)
+                    {
+                        gameStatus = GameStatus.Started;
+                        StartGame();
+                    }
+                    break;
+
+                case GameStatus.Started:
+                    UpdateTimer();
+
+                    break;
+
+                case GameStatus.Finished:
+                    break;
+
+                case GameStatus.Restarting:
+                    break;
+
+                default:
+                    break;
             }
             
         }
@@ -118,15 +131,6 @@ namespace Ch.Luca.MyGame
 
         public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
         {
-            //faire les vérification seulement si l'on est le masterclient
-            if (PhotonNetwork.IsMasterClient && !hasGameStarted)
-            {
-                //vérifier que tous les joueurs ont chargé
-                if (CheckAllPlayerReady())
-                {
-                    GameSetup();
-                }
-            }
         }
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
@@ -144,16 +148,10 @@ namespace Ch.Luca.MyGame
                 gameStartTime = (double)propsTime;
             }
 
-            object propsStarted;
-            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_GAME_STARTED, out propsStarted))
+            object propsGameStatus;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_STATUS, out propsGameStatus))
             {
-                hasGameStarted = (bool)propsStarted;
-            }
-
-            object propsCountDownStarted;
-            if (propertiesThatChanged.TryGetValue(SlideRaceGame.HAS_COUNT_DOWN_STARTED, out propsCountDownStarted))
-            {
-                hasCountDownStarted = (bool)propsCountDownStarted;
+                gameStatus = (GameStatus)propsGameStatus;
             }
         }
 
@@ -244,11 +242,13 @@ namespace Ch.Luca.MyGame
             //Démarrer le timer du compte à rebours
             Hashtable props = new Hashtable();
             props.Add(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, PhotonNetwork.Time);
-            props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
+            //props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
+            props.Add(SlideRaceGame.GAME_STATUS, GameStatus.CountDown);
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
             countDownStartTime = PhotonNetwork.Time;
-            hasGameStarted = true;
+            //hasGameStarted = true;
+            gameStatus = GameStatus.CountDown;
 
             GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
             
@@ -260,10 +260,12 @@ namespace Ch.Luca.MyGame
             {
                 Hashtable props = new Hashtable();
                 props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
-                props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
+                //props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
+                props.Add(SlideRaceGame.GAME_STATUS, GameStatus.Started);
+
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
-                hasCountDownStarted = false;
+                //hasCountDownStarted = false;
 
                 GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
                 GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
