@@ -31,8 +31,6 @@ public class PlayerListEntry : MonoBehaviour
         }
         else
         {
-            Hashtable initialProps = new Hashtable() {{SlideRaceGame.PLAYER_READY, isPlayerReady}, {SlideRaceGame.PLAYER_LIVES, SlideRaceGame.PLAYER_MAX_LIVES}};
-            PhotonNetwork.LocalPlayer.SetCustomProperties(initialProps);
             PhotonNetwork.LocalPlayer.SetScore(0);
 
             PlayerReadyButton.onClick.AddListener(() =>

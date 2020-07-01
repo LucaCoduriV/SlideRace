@@ -17,6 +17,7 @@ namespace Ch.Luca.MyGame
         public static List<GameObject> players = new List<GameObject>();
         public static GameObject localPhotonPlayer;
         public GameObject playerPrefab;
+        public List<PlayerController> playerControllers;
 
         public double gameStartTime;
         private double remainingTime = 300;
@@ -31,9 +32,15 @@ namespace Ch.Luca.MyGame
 
         public static event Action OnSpectateModeActivated;
         public static event Action OnSpectateModeDisabled;
-        private event Action OnCountDownEnd;
 
-        
+        public event Action OnCountDownStart;
+        public event Action OnGameStart;
+        public event Action OnGameEnd;
+        public event Action OnGameRestart;
+
+        private bool wasEventCalled = false;
+
+
 
         public GameStatus gameStatus = GameStatus.WaitingForPlayers;
 
@@ -56,8 +63,12 @@ namespace Ch.Luca.MyGame
 
         void Start()
         {
+            PhotonNetwork.AutomaticallySyncScene = true;
             Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_READY, true } };
             PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+
+            InvokeRepeating("UpdatePing", 0, 1.0f);
+
         }
 
         
@@ -76,10 +87,18 @@ namespace Ch.Luca.MyGame
                             GameSetup();
                         }
                     }
+
+                    
                     break;
 
                 case GameStatus.CountDown:
+                    if (!wasEventCalled)
+                    {
+                        wasEventCalled = true;
+                        OnCountDownStart?.Invoke();
+                    }
                     
+
                     UpdateCountDown();
 
                     //si le compte à rebours est terminé on lance la game
@@ -88,23 +107,53 @@ namespace Ch.Luca.MyGame
                         gameStatus = GameStatus.Started;
                         StartGame();
                     }
+
+
+                    wasEventCalled = false;
                     break;
 
                 case GameStatus.Started:
+                    if (!wasEventCalled)
+                    {
+                        wasEventCalled = true;
+                        OnGameStart?.Invoke();
+                    }
+                        
+
                     UpdateTimer();
 
+                    wasEventCalled = false;
                     break;
 
                 case GameStatus.Finished:
+                    if (!wasEventCalled)
+                    {
+                        wasEventCalled = true;
+                        OnGameEnd?.Invoke();
+                    }
+
+                    EndGame();
+
+                    wasEventCalled = false;
                     break;
 
                 case GameStatus.Restarting:
+                    if (!wasEventCalled)
+                    {
+                        wasEventCalled = true;
+                        OnGameRestart?.Invoke();
+                    }
+
+                    wasEventCalled = false;
+                    photonView.RPC("RestartScene", RpcTarget.All);
                     break;
 
                 default:
                     break;
             }
+
             
+
         }
 
         public override void OnDisable()
@@ -112,6 +161,7 @@ namespace Ch.Luca.MyGame
             instance = null;
             players = null;
             localPhotonPlayer = null;
+            CancelInvoke();
         }
 
         #endregion
@@ -121,16 +171,14 @@ namespace Ch.Luca.MyGame
 
         public override void OnLeftRoom()
         {
+            //CancelInvoke();
             SceneManager.LoadScene(0);
         }
 
         public override void OnJoinedRoom()
         {
             OnSpectateModeActivated?.Invoke();
-        }
-
-        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
-        {
+            
         }
 
         public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
@@ -162,46 +210,48 @@ namespace Ch.Luca.MyGame
         public void LeaveRoom()
         {
             OnSpectateModeActivated();
+            CancelInvoke("UpdatePing");
             PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
             PhotonNetwork.LeaveRoom();
+            
         }
-
-        
-
-        
-
 
         [PunRPC]
         public void RestartScene()
         {
+            CancelInvoke("UpdatePing");
             PhotonNetwork.LoadLevel(SceneManager.GetActiveScene().buildIndex);
         }
-
-
 
         #endregion
 
         #region Private Methods
 
         [Obsolete("Cette methode n'est pas bonne.")]
-        public void OnPlayerDeath(int ownerNb)
+        public void OnPlayerDeath(object sender, object killer)
         {
-            if(PhotonNetwork.LocalPlayer.ActorNumber == ownerNb) 
+            if(sender is PlayerController)
             {
-                //activer le mode spectateur seulement si le joueur local meurt
-                OnSpectateModeActivated?.Invoke();
-            }
+                PlayerController targetPlayer = (PlayerController)sender;
 
-            if (PhotonNetwork.IsMasterClient)
-            {
-                //si il y a moins que 2 joueurs on redémarre la map
-                if (GetNumberOfPlayerAlive() <= 1)
+                if (PhotonNetwork.LocalPlayer.ActorNumber == targetPlayer.photonView.OwnerActorNr)
                 {
-                    //Faire les trucs de fin de partie
-                    Debug.Log("Game Restarted");
-                    photonView.RPC("RestartScene", RpcTarget.All);
+                    //activer le mode spectateur seulement si le joueur local meurt
+                    OnSpectateModeActivated?.Invoke();
+                }
+
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    //si il y a moins que 2 joueurs on redémarre la map
+                    if (GetNumberOfPlayerAlive() <= 1)
+                    {
+                        //Faire les trucs de fin de partie
+                        Debug.Log("Game Restarted");
+                        photonView.RPC("RestartScene", RpcTarget.All);
+                    }
                 }
             }
+            
         }
 
         private int GetNumberOfPlayerAlive()
@@ -231,6 +281,12 @@ namespace Ch.Luca.MyGame
 
             countDownRemainingTime = countDownTime - Mathf.Round((float)incTimer);
         }
+        private void UpdatePing()
+        {
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.PLAYER_PING, PhotonNetwork.GetPing());
+            PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        }
 
         private void GameSetup()
         {
@@ -242,12 +298,10 @@ namespace Ch.Luca.MyGame
             //Démarrer le timer du compte à rebours
             Hashtable props = new Hashtable();
             props.Add(SlideRaceGame.GAME_COUNT_DOWN_START_TIME, PhotonNetwork.Time);
-            //props.Add(SlideRaceGame.HAS_COUNT_DOWN_STARTED, true);
             props.Add(SlideRaceGame.GAME_STATUS, GameStatus.CountDown);
             PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
             countDownStartTime = PhotonNetwork.Time;
-            //hasGameStarted = true;
             gameStatus = GameStatus.CountDown;
 
             GetComponent<BoostManager>().photonView.RPC("TurnBoostOff", RpcTarget.All);
@@ -260,16 +314,18 @@ namespace Ch.Luca.MyGame
             {
                 Hashtable props = new Hashtable();
                 props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
-                //props.Add(SlideRaceGame.HAS_GAME_STARTED, true);
                 props.Add(SlideRaceGame.GAME_STATUS, GameStatus.Started);
 
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
 
-                //hasCountDownStarted = false;
-
                 GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
                 GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
             }
+        }
+
+        private void EndGame()
+        {
+            OnGameEnd?.Invoke();
         }
 
         private bool CheckAllPlayerReady()

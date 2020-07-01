@@ -1,8 +1,9 @@
 ﻿using Photon.Pun;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Ch.Luca.MyGame;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public class UserInterface : MonoBehaviourPunCallbacks
 {
@@ -21,6 +22,10 @@ public class UserInterface : MonoBehaviourPunCallbacks
     public TMPro.TMP_InputField sensitivityInput;
     private bool IsOptionsOpen = false;
 
+    [Header("Score Table")]
+    public GameObject ScorePanel;
+    public GameObject playerEntryPrefab;
+    public GameObject listContent;
     
 
     void Awake()
@@ -40,6 +45,11 @@ public class UserInterface : MonoBehaviourPunCallbacks
         {
             TogglePauseMenu();
         };
+    }
+
+    private void Start()
+    {
+        GameManager.instance.OnCountDownStart += UpdateScoreTable;
     }
 
     public void TogglePauseMenu()
@@ -137,6 +147,47 @@ public class UserInterface : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(0);
     }
 
+    public void UpdateScoreTable()
+    {
+
+        PlayerScoreEntry[] playerScoreEntries = listContent.GetComponentsInChildren<PlayerScoreEntry>();
+
+        //supprimmer le contenu de la liste
+        if(playerScoreEntries != null)
+        {
+            foreach (var entry in playerScoreEntries)
+            {
+                Destroy(entry.gameObject);
+            }
+        }
+        
+        //ajouter les joueurs à la liste
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            GameObject entry = Instantiate(playerEntryPrefab, listContent.transform);
+            PlayerScoreEntry entryDetails = entry.GetComponent<PlayerScoreEntry>();
+
+            if(entryDetails != null)
+            {
+                entryDetails.player = player;
+                entryDetails.SetPlayerName(player.NickName);
+                entryDetails.UpdateFromProperties(player);
+            }
+                
+
+            object ping;
+            if(player.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_PING, out ping))
+            {
+                entryDetails.SetPing((int)ping);
+            }
+
+            
+            
+        }
+    }
+
+
+
     public override void OnEnable()
     {
         inputMaster.Enable();
@@ -145,5 +196,7 @@ public class UserInterface : MonoBehaviourPunCallbacks
     public override void OnDisable()
     {
         inputMaster.Disable();
+        if(GameManager.instance != null)
+            GameManager.instance.OnCountDownStart -= UpdateScoreTable;
     }
 }

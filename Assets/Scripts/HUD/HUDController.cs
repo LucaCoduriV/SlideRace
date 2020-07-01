@@ -39,6 +39,7 @@ public class HUDController : MonoBehaviour
     {
         //hide death message
         deadMessage.gameObject.SetActive(false);
+        countDownText.gameObject.SetActive(true);
 
     }
 

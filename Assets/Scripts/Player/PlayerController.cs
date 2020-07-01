@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ExitGames.Client.Photon;
+using Ch.Luca.MyGame;
 
 public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 {
@@ -13,10 +14,17 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
 
     [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
     public static GameObject LocalPlayerInstance;
-    public event Action<int> OnPlayerDeath;
     public bool wasInstantiated = false;
 
+    public GameObject lastAttackingPlayer; //contient le dernier joueur a avoir attaqué
+
     #endregion
+
+    #region Events
+         //public event Action<int> OnPlayerDeath;
+         public event Action<object, object> OnPlayerDeath; //sender & killer
+    #endregion
+
 
     #region Private Fields
 
@@ -64,6 +72,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         characterInput = FindObjectOfType<PlayerKeyboardInput>();
 
         wasInstantiated = true;
+
+        OnPlayerDeath += GameManager.instance.OnPlayerDeath;
     }
 
     // Start is called before the first frame update
@@ -99,6 +109,17 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
         
     }
     
+    public void SetHealth(float hp)
+    {
+        photonView.RPC("RPC_SetHealth", RpcTarget.All);
+    }
+
+    [PunRPC]
+    public void RPC_SetHealth(float hp)
+    {
+        health = hp;
+    }
+
     
     public void SetLife(float life)
     {
@@ -130,7 +151,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             this.health -= quantity;
         }
 
-        IsAlive();
+        if (!IsAlive())
+        {
+            CallPlayerDeathEvent(null);
+        }
 
         if(HUDController.GetPlayerToShowHUD() == this)
         {
@@ -168,15 +192,35 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             if (photonView.IsMine)
             {
                 photonView.RPC("RPC_KillPlayer", RpcTarget.OthersBuffered);
+
+                object death;
+                if(PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_DEATH_COUNTER, out death))
+                {
+                    Debug.Log("JE MET A JOUR LE NOMBRE DE MORT ! nombre: " + (int)death);
+                    Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_DEATH_COUNTER, (int)death + 1 } };
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                }
+                else
+                {
+                    Debug.Log("MARCHE PAS");
+                    Hashtable props = new Hashtable() { { SlideRaceGame.PLAYER_DEATH_COUNTER, 1 } };
+                    PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+                }
+
+                
             }
 
-            Ch.Luca.MyGame.GameManager.instance.OnPlayerDeath(photonView.OwnerActorNr);
+            
         }
         else isDead = false;
 
         return isDead;
     }
 
+    private void CallPlayerDeathEvent(object killer)
+    {
+        OnPlayerDeath?.Invoke(this, killer);
+    }
 
     public override void OnEnable()
     {
@@ -213,6 +257,11 @@ public class PlayerController : MonoBehaviourPunCallbacks, IPunObservable
             // Network player, receive data
             this.health = (float)stream.ReceiveNext();
         }
+    }
+
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+
     }
 
     [PunRPC]
