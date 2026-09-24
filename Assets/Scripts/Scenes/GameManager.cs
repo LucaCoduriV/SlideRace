@@ -27,8 +27,15 @@ namespace Ch.Luca.MyGame
         public double countDownTime = 5;
         private double countDownRemainingTime = 5;
 
+        [Tooltip("Durée (s) pendant laquelle le gagnant est affiché avant de relancer une manche")]
+        public double endOfRoundDelay = 5;
+        public double gameEndTime;
+        private int winnerActorNumber = PlayerController.NO_KILLER;
+        private int playersAtRoundStart = 0;
+
         public double RemainingTime { get => remainingTime; }
         public double CountDownRemainingTime { get => countDownRemainingTime; }
+        public int WinnerActorNumber { get => winnerActorNumber; }
 
         public static event Action OnSpectateModeActivated;
         public static event Action OnSpectateModeDisabled;
@@ -38,7 +45,7 @@ namespace Ch.Luca.MyGame
         public event Action OnGameEnd;
         public event Action OnGameRestart;
 
-        private bool wasEventCalled = false;
+        private GameStatus lastNotifiedStatus = GameStatus.WaitingForPlayers;
 
 
 
@@ -75,6 +82,13 @@ namespace Ch.Luca.MyGame
 
         void Update()
         {
+            //déclencher les events une seule fois, au changement d'état
+            if (gameStatus != lastNotifiedStatus)
+            {
+                lastNotifiedStatus = gameStatus;
+                OnStatusChanged(gameStatus);
+            }
+
             switch (gameStatus)
             {
                 case GameStatus.WaitingForPlayers:
@@ -87,18 +101,9 @@ namespace Ch.Luca.MyGame
                             GameSetup();
                         }
                     }
-
-                    
                     break;
 
                 case GameStatus.CountDown:
-                    if (!wasEventCalled)
-                    {
-                        wasEventCalled = true;
-                        OnCountDownStart?.Invoke();
-                    }
-                    
-
                     UpdateCountDown();
 
                     //si le compte à rebours est terminé on lance la game
@@ -107,57 +112,60 @@ namespace Ch.Luca.MyGame
                         gameStatus = GameStatus.Started;
                         StartGame();
                     }
-
-
-                    wasEventCalled = false;
                     break;
 
                 case GameStatus.Started:
-                    if (!wasEventCalled)
-                    {
-                        wasEventCalled = true;
-                        OnGameStart?.Invoke();
-                    }
-                        
-
                     UpdateTimer();
 
-                    wasEventCalled = false;
+                    //c'est le masterclient qui décide de la fin de la manche
+                    if (PhotonNetwork.IsMasterClient)
+                    {
+                        CheckForRoundEnd();
+                    }
                     break;
 
                 case GameStatus.Finished:
-                    if (!wasEventCalled)
+                    //laisser le temps de voir le gagnant puis relancer la manche
+                    if (PhotonNetwork.IsMasterClient && PhotonNetwork.Time - gameEndTime >= endOfRoundDelay)
                     {
-                        wasEventCalled = true;
-                        OnGameEnd?.Invoke();
+                        RestartRound();
                     }
-
-                    EndGame();
-
-                    wasEventCalled = false;
                     break;
 
                 case GameStatus.Restarting:
-                    if (!wasEventCalled)
-                    {
-                        wasEventCalled = true;
-                        OnGameRestart?.Invoke();
-                    }
-
-                    wasEventCalled = false;
-                    photonView.RPC("RestartScene", RpcTarget.All);
+                    //la scène est en train d'être rechargée
                     break;
 
                 default:
                     break;
             }
+        }
 
-            
-
+        private void OnStatusChanged(GameStatus status)
+        {
+            switch (status)
+            {
+                case GameStatus.CountDown:
+                    OnCountDownStart?.Invoke();
+                    break;
+                case GameStatus.Started:
+                    OnGameStart?.Invoke();
+                    break;
+                case GameStatus.Finished:
+                    OnGameEnd?.Invoke();
+                    break;
+                case GameStatus.Restarting:
+                    OnGameRestart?.Invoke();
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void OnDisable()
         {
+            //se désinscrire des callbacks Photon, sinon l'ancienne instance les reçoit encore après un rechargement de scène
+            base.OnDisable();
             instance = null;
             players = null;
             localPhotonPlayer = null;
@@ -196,6 +204,18 @@ namespace Ch.Luca.MyGame
                 gameStartTime = (double)propsTime;
             }
 
+            object propsWinner;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_WINNER, out propsWinner))
+            {
+                winnerActorNumber = (int)propsWinner;
+            }
+
+            object propsEndTime;
+            if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_END_TIME, out propsEndTime))
+            {
+                gameEndTime = (double)propsEndTime;
+            }
+
             object propsGameStatus;
             if (propertiesThatChanged.TryGetValue(SlideRaceGame.GAME_STATUS, out propsGameStatus))
             {
@@ -209,7 +229,7 @@ namespace Ch.Luca.MyGame
 
         public void LeaveRoom()
         {
-            OnSpectateModeActivated();
+            OnSpectateModeActivated?.Invoke();
             CancelInvoke("UpdatePing");
             PhotonNetwork.DestroyPlayerObjects(PhotonNetwork.LocalPlayer);
             PhotonNetwork.LeaveRoom();
@@ -227,52 +247,81 @@ namespace Ch.Luca.MyGame
 
         #region Private Methods
 
-        [Obsolete("Cette methode n'est pas bonne.")]
-        public void OnPlayerDeath(object sender, object killer)
-        {
-            if(sender is PlayerController)
-            {
-                PlayerController targetPlayer = (PlayerController)sender;
-
-                if (PhotonNetwork.LocalPlayer.ActorNumber == targetPlayer.photonView.OwnerActorNr)
-                {
-                    //activer le mode spectateur seulement si le joueur local meurt
-                    OnSpectateModeActivated?.Invoke();
-                }
-
-                if (PhotonNetwork.IsMasterClient)
-                {
-                    //si il y a moins que 2 joueurs on redémarre la map
-                    if (GetNumberOfPlayerAlive() <= 1)
-                    {
-                        //Faire les trucs de fin de partie
-                        Debug.Log("Game Restarted");
-                        photonView.RPC("RestartScene", RpcTarget.All);
-                    }
-                }
-            }
-            
-        }
-
-        private int GetNumberOfPlayerAlive()
-        {
-            int nbPlayerAlive = 0;
-
-            foreach(var player in FindObjectsOfType<PlayerController>())
-            {
-                if (!player.IsDead)
-                {
-                    nbPlayerAlive++;
-                }
-            }
-            return nbPlayerAlive;
-        }
-
         private void UpdateTimer()
         {
             double incTimer = PhotonNetwork.Time - gameStartTime;
 
-            remainingTime = roundTime - Mathf.Round((float)incTimer);
+            remainingTime = Math.Max(0, roundTime - Mathf.Round((float)incTimer));
+        }
+
+        //Exécuté par le masterclient : la manche se termine quand il ne reste qu'un survivant,
+        //que tout le monde est mort, ou que le temps est écoulé.
+        private void CheckForRoundEnd()
+        {
+            PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
+            PlayerController lastAlive = null;
+            int nbPlayerAlive = 0;
+
+            foreach (var player in allPlayers)
+            {
+                if (!player.IsDead)
+                {
+                    nbPlayerAlive++;
+                    lastAlive = player;
+                }
+            }
+
+            //en solo (test) on ne gagne pas juste parce qu'on est le seul survivant
+            int nbPlayersInRound = Math.Max(playersAtRoundStart, allPlayers.Length);
+
+            if (nbPlayerAlive == 0)
+            {
+                EndRound(PlayerController.NO_KILLER);
+            }
+            else if (nbPlayersInRound >= 2 && nbPlayerAlive == 1)
+            {
+                EndRound(lastAlive.photonView.OwnerActorNr);
+            }
+            else if (remainingTime <= 0)
+            {
+                //temps écoulé avec plusieurs survivants : égalité
+                EndRound(PlayerController.NO_KILLER);
+            }
+        }
+
+        private void EndRound(int winner)
+        {
+            Debug.Log("Round finished, winner: " + winner);
+
+            gameStatus = GameStatus.Finished;
+            winnerActorNumber = winner;
+            gameEndTime = PhotonNetwork.Time;
+
+            Hashtable props = new Hashtable();
+            props.Add(SlideRaceGame.GAME_STATUS, GameStatus.Finished);
+            props.Add(SlideRaceGame.GAME_WINNER, winner);
+            props.Add(SlideRaceGame.GAME_END_TIME, gameEndTime);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+
+            //chaque joueur met à jour ses propres compteurs
+            Player winnerPlayer = PhotonNetwork.CurrentRoom.GetPlayer(winner);
+            if (winnerPlayer != null)
+            {
+                photonView.RPC("RPC_AddWin", winnerPlayer);
+            }
+        }
+
+        [PunRPC]
+        private void RPC_AddWin()
+        {
+            PlayerController.IncrementLocalPlayerProperty(SlideRaceGame.PLAYER_WIN_COUNTER);
+        }
+
+        private void RestartRound()
+        {
+            //ne relancer la scène qu'une seule fois
+            gameStatus = GameStatus.Restarting;
+            photonView.RPC("RestartScene", RpcTarget.All);
         }
 
         private void UpdateCountDown()
@@ -310,10 +359,15 @@ namespace Ch.Luca.MyGame
 
         private void StartGame()
         {
+            //valeur locale en attendant celle du masterclient, sinon le timer part d'une valeur fausse
+            gameStartTime = PhotonNetwork.Time;
+            remainingTime = roundTime;
+            playersAtRoundStart = FindObjectsOfType<PlayerController>().Length;
+
             if (PhotonNetwork.IsMasterClient)
             {
                 Hashtable props = new Hashtable();
-                props.Add(SlideRaceGame.GAME_START_TIME, PhotonNetwork.Time);
+                props.Add(SlideRaceGame.GAME_START_TIME, gameStartTime);
                 props.Add(SlideRaceGame.GAME_STATUS, GameStatus.Started);
 
                 PhotonNetwork.CurrentRoom.SetCustomProperties(props);
@@ -321,11 +375,6 @@ namespace Ch.Luca.MyGame
                 GetComponent<ControlsManager>().photonView.RPC("TurnControllsOn", RpcTarget.All);
                 GetComponent<BoostManager>().photonView.RPC("TurnBoostOn", RpcTarget.All);
             }
-        }
-
-        private void EndGame()
-        {
-            OnGameEnd?.Invoke();
         }
 
         private bool CheckAllPlayerReady()
@@ -350,7 +399,11 @@ namespace Ch.Luca.MyGame
 
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
-            PhotonNetwork.DestroyPlayerObjects(otherPlayer);
+            //seul le masterclient a le droit de détruire les objets d'un autre joueur
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.DestroyPlayerObjects(otherPlayer);
+            }
         }
         #endregion
     }

@@ -108,8 +108,9 @@ public class Inventory : MonoBehaviourPunCallbacks
     {
         for (int i = 0; i < inventory_remade.Count; i++)
         {
-
-            PhotonView.Find(inventory_remade[i]).gameObject.SetActive(false);
+            PhotonView item = PhotonView.Find(inventory_remade[i]);
+            if (item != null)
+                item.gameObject.SetActive(false);
         }
     }
 
@@ -127,11 +128,16 @@ public class Inventory : MonoBehaviourPunCallbacks
                 //executer animation de lancement
                 animator.SetTrigger("Throw");
             }
-            else if(contextObject.GetComponent<Knife>() != null && contextObject.GetComponent<Knife>().readyToUse)
+            else if(contextObject.GetComponent<Knife>() != null)
             {
-                //executer animation d'attaque elle change selon l'item qui se trouve en main
-                contextObject.GetComponent<Knife>().readyToUse = false;
-                animator.SetTrigger("Attack");
+                //le couteau est réutilisable, il faut juste attendre la fin du cooldown
+                Knife knife = contextObject.GetComponent<Knife>();
+                if (knife.CanAttack)
+                {
+                    //executer animation d'attaque elle change selon l'item qui se trouve en main
+                    knife.StartCooldown();
+                    animator.SetTrigger("Attack");
+                }
                 oneUse = false;
             }
             else if (contextObject.GetComponent<PickableItem>() != null)
@@ -141,11 +147,8 @@ public class Inventory : MonoBehaviourPunCallbacks
 
             if (oneUse)
             {
-                //retirer l'objet de l'inventaire
-                inventory_remade.RemoveAt(selectedObject);
-
-                //selectionner un autre objet dans l'inventaire
-                photonView.RPC("PreviousObject", RpcTarget.All);
+                //retirer l'objet de l'inventaire sur tous les clients puis en selectionner un autre
+                photonView.RPC("RemoveItemFromInventory", RpcTarget.All, inventory_remade[selectedObject]);
             }
             
         }
@@ -184,6 +187,15 @@ public class Inventory : MonoBehaviourPunCallbacks
 
     }
 
+
+    [PunRPC]
+    private void RemoveItemFromInventory(int id)
+    {
+        inventory_remade.Remove(id);
+
+        //selectionner un autre objet dans l'inventaire
+        PreviousObject();
+    }
 
     [PunRPC]
     private void StoreItemInInventory(int id)
@@ -231,13 +243,17 @@ public class Inventory : MonoBehaviourPunCallbacks
 
     }
 
+    //Appelés par des events d'animation, qui se déclenchent aussi chez les autres clients :
+    //seul le propriétaire utilise réellement l'objet.
     public void OnThrow()
     {
-        contextObject.GetComponent<PickableItem>().Use(mainCamera);
+        if (photonView.IsMine && contextObject != null)
+            contextObject.GetComponent<PickableItem>().Use(mainCamera);
     }
 
     public void OnAttack()
     {
-        contextObject.GetComponent<PickableItem>().Use(mainCamera);
+        if (photonView.IsMine && contextObject != null)
+            contextObject.GetComponent<PickableItem>().Use(mainCamera);
     }
 }

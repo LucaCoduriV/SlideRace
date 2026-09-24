@@ -8,6 +8,7 @@ public class SlideRaceGame
     public const string PLAYER_LOADED_LEVEL = "PlayerLoadedLevel"; //pas encore utilisé
     public const string PLAYER_DEATH_COUNTER = "PlayerDeathCounter";
     public const string PLAYER_KILL_COUNTER = "PlayerKillCounter";
+    public const string PLAYER_WIN_COUNTER = "PlayerWinCounter";
     public const string PLAYER_PING = "PlayerPing";
 
     //Game
@@ -16,6 +17,8 @@ public class SlideRaceGame
     public const string HAS_GAME_STARTED = "HasGameStarted";
     public const string HAS_COUNT_DOWN_STARTED = "HasCountDownStarted";
     public const string GAME_STATUS = "GameStatus";
+    public const string GAME_WINNER = "GameWinner"; //ActorNumber du gagnant, -1 si égalité
+    public const string GAME_END_TIME = "GameEndTime";
 
 }
 

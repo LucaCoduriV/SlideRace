@@ -108,6 +108,10 @@ public class PlayerScoreEntry : MonoBehaviourPunCallbacks
         {
             SetKill((int)props);
         }
+        if (player.CustomProperties.TryGetValue(SlideRaceGame.PLAYER_WIN_COUNTER, out props))
+        {
+            SetWin((int)props);
+        }
     }
 
     public void UpdateFromProperties(Hashtable changedProps)
@@ -121,10 +125,16 @@ public class PlayerScoreEntry : MonoBehaviourPunCallbacks
         {
             SetKill((int)props);
         }
+        if (changedProps.TryGetValue(SlideRaceGame.PLAYER_WIN_COUNTER, out props))
+        {
+            SetWin((int)props);
+        }
     }
 
     public override void OnDisable()
     {
+        //se désinscrire des callbacks Photon, sinon les entrées détruites continuent de les recevoir
+        base.OnDisable();
         CancelInvoke("UpdatePing");
     }
 }
