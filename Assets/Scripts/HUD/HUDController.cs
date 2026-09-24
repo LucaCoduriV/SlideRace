@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Ch.Luca.MyGame;
+using Photon.Pun;
 
 public class HUDController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class HUDController : MonoBehaviour
     public Text deadMessage;
     public Text timeText;
     public TMPro.TMP_Text countDownText;
+    public float goMessageDuration = 1f;
     
 
     private static HUDController instance;
@@ -57,19 +59,53 @@ public class HUDController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        GameManager gameManager = GameManager.instance;
+        if (gameManager == null)
+            return;
 
-        if (GameManager.instance?.CountDownRemainingTime > 0)
+        switch (gameManager.gameStatus)
         {
-            UpdateCountDown();
-        }
-        else
-        {
-            countDownText.gameObject.SetActive(false);
-            UpdateGameTimer();
-        }
-        
+            case GameStatus.Started:
+                //afficher "GO!" brièvement au début de la manche
+                bool justStarted = PhotonNetwork.Time - gameManager.gameStartTime < goMessageDuration;
+                countDownText.gameObject.SetActive(justStarted);
+                if (justStarted)
+                    countDownText.text = "GO!";
 
+                UpdateGameTimer();
+                break;
+
+            case GameStatus.Finished:
+            case GameStatus.Restarting:
+                countDownText.gameObject.SetActive(true);
+                countDownText.text = GetRoundResultMessage(gameManager.WinnerActorNumber);
+                UpdateGameTimer();
+                break;
+
+            default:
+                if (gameManager.CountDownRemainingTime > 0)
+                {
+                    countDownText.gameObject.SetActive(true);
+                    UpdateCountDown();
+                }
+                else
+                {
+                    countDownText.gameObject.SetActive(false);
+                }
+                break;
+        }
+    }
+
+    private string GetRoundResultMessage(int winnerActorNumber)
+    {
+        if (winnerActorNumber == PlayerController.NO_KILLER)
+            return "Draw!";
+
+        if (winnerActorNumber == PhotonNetwork.LocalPlayer.ActorNumber)
+            return "You win!";
+
+        Photon.Realtime.Player winner = PhotonNetwork.CurrentRoom?.GetPlayer(winnerActorNumber);
+        return (winner != null ? winner.NickName : "Someone") + " wins!";
     }
 
     public static void UpdateHUD()
@@ -106,7 +142,9 @@ public class HUDController : MonoBehaviour
     }
     private void UpdateGameTimer()
     {
-        timeText.text = GameManager.instance.RemainingTime.ToString();
+        //format mm:ss
+        int seconds = Mathf.Max(0, (int)GameManager.instance.RemainingTime);
+        timeText.text = string.Format("{0}:{1:00}", seconds / 60, seconds % 60);
     }
 
     private void UpdateCountDown()

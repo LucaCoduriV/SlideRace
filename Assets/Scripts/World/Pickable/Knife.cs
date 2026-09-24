@@ -9,28 +9,51 @@ public class Knife : PickableItem
 
     [SerializeField] private float hitDistance = 2f;
     [SerializeField] private float damage = 25f;
+    [Tooltip("Rayon du coup, permet de toucher sans viser au pixel près")]
+    [SerializeField] private float hitRadius = 0.3f;
+    [Tooltip("Temps minimum (s) entre deux coups de couteau")]
+    [SerializeField] private float attackCooldown = 0.6f;
+
+    private float nextAttackTime = 0f;
+
+    public bool CanAttack { get => Time.time >= nextAttackTime; }
 
     private Transform cameraView;
+
+    public void StartCooldown()
+    {
+        nextAttackTime = Time.time + attackCooldown;
+    }
+
     public override void Use(Transform viewTransform)
     {
-        //RAYCAST d'une certaine distance
-        RaycastHit hit;
-        Ray ray = new Ray(viewTransform.position, viewTransform.forward);
-        Physics.Raycast(ray, out hit, hitDistance);
-
-        //récupérer l'objet touché et vérifier s'il s'agit d'un joueur
-        if (hit.collider != null)
-        {
-            PlayerController player = hit.collider.gameObject.GetComponent<PlayerController>();
-            if (player != null)
-            {
-                //lui enlever de la vie
-                player.SendRemoveLife(damage);
-            }
-        }
-        
         cameraView = viewTransform;
 
+        //le joueur qui tient le couteau (pour ne pas se toucher soi-même)
+        PlayerController owner = GetComponentInParent<PlayerController>();
+
+        Ray ray = new Ray(viewTransform.position, viewTransform.forward);
+        RaycastHit[] hits = Physics.SphereCastAll(ray, hitRadius, hitDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (RaycastHit hit in hits)
+        {
+            PlayerController player = hit.collider.GetComponentInParent<PlayerController>();
+
+            //ignorer notre propre corps
+            if (player != null && player == owner)
+                continue;
+
+            //récupérer l'objet touché et vérifier s'il s'agit d'un joueur
+            if (player != null && !player.IsDead)
+            {
+                //lui enlever de la vie
+                player.ApplyDamage(damage, PhotonNetwork.LocalPlayer.ActorNumber);
+            }
+
+            //le premier obstacle arrête le coup (on ne frappe pas à travers les murs)
+            break;
+        }
     }
 
     private void Update()

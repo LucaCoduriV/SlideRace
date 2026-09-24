@@ -36,6 +36,10 @@ public class Ragdoll : MonoBehaviourPun
     [PunRPC]
     public void TurnRagdollOn()
     {
+        //éviter d'ajouter plusieurs joints si l'appel arrive plusieurs fois (RPC buffered, mort + touche debug...)
+        if (isRagdoll)
+            return;
+
         GetComponent<Animator>().enabled = false;
         GetComponent<Rigidbody>().isKinematic = false;
         GetComponent<Rigidbody>().freezeRotation = false;

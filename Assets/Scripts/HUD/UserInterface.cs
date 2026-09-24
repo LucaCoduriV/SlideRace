@@ -142,11 +142,6 @@ public class UserInterface : MonoBehaviourPunCallbacks
         
     }
 
-    public override void OnLeftRoom()
-    {
-        PhotonNetwork.LoadLevel(0);
-    }
-
     public void UpdateScoreTable()
     {
 
@@ -188,13 +183,25 @@ public class UserInterface : MonoBehaviourPunCallbacks
 
 
 
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        UpdateScoreTable();
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        UpdateScoreTable();
+    }
+
     public override void OnEnable()
     {
+        base.OnEnable();
         inputMaster.Enable();
     }
 
     public override void OnDisable()
     {
+        base.OnDisable();
         inputMaster.Disable();
         if(GameManager.instance != null)
             GameManager.instance.OnCountDownStart -= UpdateScoreTable;

@@ -62,27 +62,35 @@ public class Grenade : PickableItem, IThrowableItem
         yield return new WaitForSeconds(duration);
 
 
-        photonView.RPC("Explode", RpcTarget.All);
-
-        //Explode();
+        //la position et le lanceur sont envoyés pour que tous les clients calculent la même explosion
+        photonView.RPC("Explode", RpcTarget.All, transform.position, PhotonNetwork.LocalPlayer.ActorNumber);
 
     }
 
     [PunRPC]
-    private void Explode()
+    private void Explode(Vector3 position, int throwerActorNr)
     {
+        if (hasExploded)
+            return;
+        hasExploded = true;
 
-        Instantiate(explosionEffect, transform.position, transform.rotation);
+        Instantiate(explosionEffect, position, transform.rotation);
 
-        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius);
+        Collider[] colliders = Physics.OverlapSphere(position, explosionRadius);
+        HashSet<PlayerController> damagedPlayers = new HashSet<PlayerController>();
 
-        foreach(Collider player in colliders)
+        foreach(Collider collider in colliders)
         {
-            if (player.CompareTag("Player"))
+            if (collider.CompareTag("Player"))
             {
-                float damage = CalculateDamageFromDistance(player.transform.position, this.transform.position);
+                PlayerController player = collider.GetComponent<PlayerController>();
 
-                player.GetComponent<PlayerController>().RemoveLife(damage);
+                //un joueur peut avoir plusieurs colliders, et seul son propriétaire applique les dégâts
+                if (player == null || !player.photonView.IsMine || !damagedPlayers.Add(player))
+                    continue;
+
+                float damage = CalculateDamageFromDistance(player.transform.position, position);
+                player.ApplyDamage(damage, throwerActorNr);
             }
         }
 
@@ -91,12 +99,13 @@ public class Grenade : PickableItem, IThrowableItem
         
     }
 
+    //Dégâts maximum au centre, diminuent linéairement jusqu'à 0 au bord du rayon d'explosion
     private float CalculateDamageFromDistance(Vector3 PointA, Vector3 PointB)
     {
 
         float distance = Vector3.Distance(PointA, PointB);
 
-        return maxDamage * 1 / Mathf.Sqrt(distance);
+        return maxDamage * Mathf.Clamp01(1f - distance / explosionRadius);
     }
 
 
